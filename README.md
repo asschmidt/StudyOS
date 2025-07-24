@@ -64,6 +64,6 @@ Possbile build targets are:
 To quickly test the Stage 1 Bootloader, the following command can be used to run QEmu with the generated disk image
 `$ qemu-system-i386 -fda boot_floppy.img -boot order=a -no-fd-bootchk -D ./log.txt`
 
-Due if only the Stage 1 bootloader was built, the following outputs should be visible on the QEmu window
+If only the Stage 1 bootloader was built, the following outputs should be visible on the QEmu window
 
 ![QEmu with Stage 1 Bootloader](doc/images/QEmu_Stage1_Test.png)
