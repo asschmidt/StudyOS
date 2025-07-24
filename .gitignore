@@ -1,0 +1,9 @@
+*.bin
+*.elf
+*.o
+*.img
+
+**/.cache/
+**/__pycache__/
+
+**/media/

@@ -1,0 +1,10 @@
+# Start QEMU
+nasm -f bin bootsect.asm -o bootsect.bin && qemu-system-i386 -s -S bootsect.bin
+
+# Start gdb
+gdb -ix gdb_init_real_mode.txt -ex 'set architecture i8086'  -ex 'set tdesc filename target.xml' -ex 'target remote localhost:1234'
+
+
+# Some URLs for the Topics
+# https://astralvx.com/debugging-16-bit-in-qemu-with-gdb-on-windows/
+# https://coderedirect.com/questions/236599/qemu-gdb-does-not-show-instructions-of-firmware
