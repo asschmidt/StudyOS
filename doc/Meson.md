@@ -64,6 +64,7 @@ The parameter for the assembler are used for nearly all assembly processes durin
 
 For the GNU C Compiler, only the Debug-Information are activated and also the target architecture is set to 32 Bit.
 
+## Library Targets
 After all the common configuration settings, the first build target is specified. This is a static library for BIOS functions in Real-Mode.
 
 ```meson
@@ -103,6 +104,7 @@ After the generator definition, the source files (C- and Assembler-Source Files 
 
 Finally, the static library is built with the specified C-Source-Files and the already assembled object files. This concept of creating static libraries is used for all libraries in the project. Beside the `libbios`, there are also `liblowlevel` and `libenv`.
 
+## Main Build Targets
 The first main build target in the Meson build file is the Stage 1 Bootloader. This build target is split into two separate parts. The first part is pretty similar to the static library and contains the generator definition for the assembly process and the definition of the source files
 
 ```meson
@@ -194,6 +196,9 @@ The second build target `stage1_link_bin` is used to create a raw binary file fo
 The Meson function `executable()` (used to create the ELF binary) uses the GCC Linker and not directly `ld`. Therefore, the Linker options must be specified with a different command line syntax.
 If there is a `-Wl,<SomeOption>`, this setting is directly for the Linker which is called by GCC and if the `-Wl,`is missing, the options is directly passed to GCC.
 
+### Linker Options for ELF Targets
+The following table list the used Linker Options for the ELF target of the Stage 1 Bootloader
+
 | Options                | Description                        |
 | ---------------------- | ---------------------------------- |
 | `-Wl,-melf_i386`       | Instructs the Linker to generate a 32-bit ELF target for x86 |
@@ -206,3 +211,57 @@ If there is a `-Wl,<SomeOption>`, this setting is directly for the Linker which 
 | `-nostartfiles`        | Prevents the GCC Linker to link standard system startup files |
 | `-nolibc`              | Prevents the GCC Linker to link standard C library |
 | `-Os`                  | Set the optimization level for the C-Compiler to _optimize for size_ |
+
+
+## Using Meson
+The section will provide some commandline options for Meson to prepare and build the targets
+
+Due to the fact that Meson is a kind of "Meta-Build System", Meson is not able to run the build commands by its own. Instead it generates build files, based on the Meson Build-File, for the Ninja Build System. Therefore, you need Meson **and** Ninja to run a build.
+
+**Prepare Build Directory**
+To prepare a Meson build and generate the Ninja build files, the following command can be used
+
+`$ meson setup <Directory>`
+
+Hereby, `<Directory>` specifies the build directory where all build files will be generated and where also all build artifacts will be stored. Meson uses in this case _out-of-source builds_
+
+**Clean Build Directory**
+To clean the build directory and all build artifacts, the following Ninja command can be used
+
+`$ ninja clean`
+
+This target deletes all object files and also all other, generated files in the build directory.
+
+**Verbose Output**
+For debugging purposes, Meson can output all commands which are executed during a build. The following Ninja commandline provides verbose output of the commands
+
+`$ ninja -v <BuildTarget>`
+
+Hereby, `<BuildTarget>` might be any valid build target
+
+**Get a list of Build-Targets**
+To get a list of all available build targets inside a Meson build, the following commandline can be used
+
+`$ ninja -t targets`
+
+This outputs a list of available targets. The following snippet shows an example for the StudyOS project
+
+```
+floppy: phony
+fs: phony
+stage1: phony
+stage2: phony
+biosapi: phony
+test: phony
+benchmark: phony
+install: phony
+dist: phony
+scan-build: phony
+TAGS: phony
+ctags: phony
+uninstall: phony
+clean: phony
+build.ninja: REGENERATE_BUILD
+reconfigure: REGENERATE_BUILD
+```
+This target list includes implicit targets like clean, explicit targets like stage1 (defined via an alias)
