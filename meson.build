@@ -14,6 +14,17 @@ lib_lowlevel_inc = '../' + lib_lowlevel_dir
 lib_env_inc = '../' + lib_env_dir
 
 #
+# Tools used for Generators and Custom-Targets
+#
+gas = find_program('as')            # GNU Assembler
+ld = find_program('ld')             # GNU Natvie Linker
+gcc = find_program('gcc')           # GNU C Compiler
+dd = find_program('dd')             # dd Tool
+objcopy = find_program('objcopy')   # objcopy Tool
+bash = find_program('bash')         # Bash Shell
+sudo = find_program('sudo')         # Sudo Tool
+
+#
 # GNU Assembler Setup for building 16/32 Bit binaries
 #
 
@@ -22,18 +33,6 @@ lib_env_inc = '../' + lib_env_dir
 # 32 Bit (not 64 Bit by default)
 # Using Intel Syntax
 gas_ags_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
-gas = find_program('as')
-
-#
-# Tools used for Generators and Custom-Targets
-#
-ld = find_program('ld')             # GNU Natvie Linker
-gcc = find_program('gcc')           # GNU C Compiler
-dd = find_program('dd')             # dd Tool
-objcopy = find_program('objcopy')   # objcopy Tool
-bash = find_program('bash')         # Bash Shell
-sudo = find_program('sudo')         # Sudo Tool
-
 
 ###############################################################################
 # Support Targets to generate Images/Floppy/Filesystem

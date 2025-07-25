@@ -22,7 +22,7 @@ The following code snippet shows an example
     mov es:[di], ax                     /* Store data in Stack */
     sub di, 2                           /* Decrement the write pointer */
     sub cx, 2                           /* Decrement the write counter */
-    jnz stackInitLoop_memInitStack      /* If still bytes to write, go back to loop */
+    jnz .stackInitLoop_memInitStack     /* If still bytes to write, go back to loop */
 
 ```
 

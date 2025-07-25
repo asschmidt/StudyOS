@@ -93,5 +93,13 @@ diff -ruN qemu-10.0.0/target/i386/gdbstub.c qemu-10.0.0_patch/target/i386/gdbstu
              return gdb_get_reg32(mem_buf, env->eflags);
 ```
 
+After applying the patches, I built QEmu with the following commands
+```
+$ ./configure
+$ make -j6
+```
+
+I didn't install the patched version of QEmu. Instead I specified the path to the QEmu version in the Eclipse "External Tool Configuration" for QEmu in Real-Mode.
+
 ## Protected Mode
 For debugging in Protected-Mode I've used the original, unpachted version of QEmu 10.0.0. In general, you can also debug with the patched version of QEmu the Protected-Mode part. Even the jump from Real-Mode to Protected-Mode works pretty good. The only issue I had was, that I was only able to debug with source-level information and not the disassembly view from GDB. The reason was (at least what I could figure out), that GDB is not disassemblign correctly (even if you set the GDB architecture manually). It looks like that his has to do with the modified Instruction Pointer register in the GDB stub because after setting the GDT, GDB is somehow disassembling the wrong memory sections.
