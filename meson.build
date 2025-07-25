@@ -24,15 +24,22 @@ objcopy = find_program('objcopy')   # objcopy Tool
 bash = find_program('bash')         # Bash Shell
 sudo = find_program('sudo')         # Sudo Tool
 
-#
-# GNU Assembler Setup for building 16/32 Bit binaries
-#
 
+###############################################################################
+# Common Tool Settings
+###############################################################################
+
+# GNU Assembler
 # Debug Infos -g
 # Architecture i386
 # 32 Bit (not 64 Bit by default)
 # Using Intel Syntax
-gas_ags_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
+gas_args_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
+
+# GNU C Compiler
+# Debug Infos -g
+# 32 Bit (not 64 Bit by default)
+gcc_args_32bit = ['-g', '-m32']
 
 ###############################################################################
 # Support Targets to generate Images/Floppy/Filesystem
@@ -45,7 +52,7 @@ boot_floppy_image = 'boot_floppy.img'
 ###############################################################################
 lib_bios_asm_gen = generator(gas,
     output: '@BASENAME@.o',
-    arguments: [gas_ags_32bit,
+    arguments: [gas_args_32bit,
                 '-I', lib_bios_inc,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
@@ -58,15 +65,12 @@ lib_bios_source_files = files(lib_bios_dir + 'bios_stdio.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_disk.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_memory.asm')
 
-# Generate ASM Sources files based on the C-Sources
-# lib_lowlevel_source_files += asm_code_gen.process(lib_bios_api_c_source_files)
-
 # Assemble the ASM source files to object files
 lib_bios_object_files = lib_bios_asm_gen.process(lib_bios_source_files)
 
 # Create the static library for liblowlevel
 lib_bios = static_library('bios',
-                    c_args: ['-m32'],
+                    c_args: [gcc_args_32bit],
                     sources: lib_bios_c_source_files,
                     objects: lib_bios_object_files)
 
@@ -75,7 +79,7 @@ lib_bios = static_library('bios',
 ###############################################################################
 lib_lowlevel_asm_gen = generator(gas,
     output: '@BASENAME@.o',
-    arguments: [gas_ags_32bit,
+    arguments: [gas_args_32bit,
                 '-I', lib_lowlevel_inc,
                 '-I', lib_bios_inc,
                 '@INPUT@',
@@ -109,7 +113,7 @@ lib_lowlevel = static_library('lowlevel',
 ###############################################################################
 lib_env_asm_gen = generator(gas,
     output: '@BASENAME@.o',
-    arguments: [gas_ags_32bit,
+    arguments: [gas_args_32bit,
 #                '-I', lib_lowlevel_inc,
 #                '-I', lib_bios_inc,
                 '@INPUT@',
@@ -138,7 +142,7 @@ lib_env = static_library('env',
 # Define the ASM Generator for Stage 1
 stage1_asm_gen = generator(gas,
     output: '@BASENAME@.o',
-    arguments: [gas_ags_32bit,
+    arguments: [gas_args_32bit,
                 '-I', lib_lowlevel_inc,
                 '-I', lib_bios_inc,
                 '@INPUT@',
@@ -171,11 +175,8 @@ stage1_linker_file  = files(stage1_source_dir + 'stage1.ld')
 
 # Linker arguments used for all targets
 stage1_linker_args  = ['-Wl,-melf_i386', '-Wl,--gc-sections', '-g', '--function-sections', '--data-sections', '-nodefaultlibs', '-nostdlib', '-nostartfiles', '-nolibc', '-Os']
-# Linker arguments used to generate the Raw Binary
-stage1_bin_linker_args  = stage1_linker_args + ['-Wl,--oformat=binary']
 # Linker arguments used to gernerate the ELF
 stage1_elf_linker_args  = stage1_linker_args + ['-Wl,--oformat=elf32-i386']
-
 
 #
 # Build Target to create the ELF for Stage1
@@ -188,20 +189,6 @@ stage1_link_elf     = executable(stage1_elf_output, stage1_object_files,
                                     ],
                         link_depends: stage1_linker_file,
                         link_whole: [lib_bios, lib_lowlevel])
-
-#
-# Build Target to create the raw binary for Stage1
-# This target has a dependency to the ELF target of Stage1. This is used to ensure
-# that the ELF and Raw Binary files are always gerneated consistently
-#
-#stage1_link_bin     = executable(stage1_bin_output, stage1_object_files,
-#                        name_suffix: 'bin',
-#                        link_args : [stage1_bin_linker_args,
-#                                   '-Wl,-Map,' + stage1_bin_output_map,
-#                                   '-T', stage1_linker_file[0].full_path()
-#                                   ],
-#                        link_with: lib_bios_api,
-#                        link_depends : stage1_link_elf)
 
 #
 # Generate a Floppy-Image (1,44 MB) incl. partitions
@@ -226,7 +213,7 @@ stage1_link_bin   = custom_target(stage1_bin_output,
 # Define the ASM Generator for Stage 2
 stage2_asm_gen = generator(gas,
     output: '@BASENAME@.o',
-    arguments: [gas_ags_32bit,
+    arguments: [gas_args_32bit,
                 '-I', lib_lowlevel_inc,
                 '-I', lib_bios_inc,
                 '-I', lib_env_inc,
@@ -281,20 +268,6 @@ stage2_link_elf     = executable(stage2_elf_output, stage2_object_files,
                                     ],
                         link_depends: stage2_linker_file,
                         link_whole: [lib_bios, lib_lowlevel, lib_env])
-
-#
-# Build Target to create the raw binary for Stage1
-# This target has a dependency to the ELF target of Stage1. This is used to ensure
-# that the ELF and Raw Binary files are always gerneated consistently
-#
-#stage1_link_bin     = executable(stage1_bin_output, stage1_object_files,
-#                        name_suffix: 'bin',
-#                        link_args : [stage1_bin_linker_args,
-#                                   '-Wl,-Map,' + stage1_bin_output_map,
-#                                   '-T', stage1_linker_file[0].full_path()
-#                                   ],
-#                        link_with: lib_bios_api,
-#                        link_depends : stage1_link_elf)
 
 #
 # Generate a Floppy-Image (1,44 MB) incl. partitions
