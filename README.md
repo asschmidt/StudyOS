@@ -4,6 +4,9 @@ This project is a playground for x86 based boot process, development tools and O
 > [!IMPORTANT]
 > This project has neither the target to create any usefull OS nor a full working/full featured OS. Instead the main purpose is to experiment with some tools like the Meson build system, GNU Compiler Toolchain or ImHex Editor and also get some knowledge about x86 internals and OS concepts.
 
+> [!NOTE]
+> All the information I've written down in the the different Markdown documents in the `doc/` folder and the source code itself is based on what I could figure out and what worked for me (respectively on my machine ;-)). If anything might be wrong or not prices enough, please let me know!
+
 ## Development Goals
 As already mentioned, the primary development goal is not to develop the next OS which is usefull in any term. Instead, it is used to learn about basic x86 concepts and the usage of some tools.
 
@@ -16,10 +19,21 @@ As already mentioned, the primary development goal is not to develop the next OS
  * Get a detailed knowledge of hardware related topics like Interrupt Controller, Periodic Intervall Timer, Video Memory, Disks, Floppy Controller etc.
  * Learn something about the internals of simple file systems like FAT
 
+## Information and Background Knowledge
+The following resource are really helpful and useful if you want to dive into the OS development and low level programming topics.
+ * [OSDev Wiki](https://wiki.osdev.org/Expanded_Main_Page)
+ * [Writing a Bootloader from Scratch](https://www.cs.cmu.edu/~410-s07/p4/p4-boot.pdf)
+ * [ELF File Format](https://github.com/compilepeace/BINARY_DISSECTION_COURSE/blob/master/ELF/ELF.md)
+ * [Introduction to the GNU Assembler](https://students.mimuw.edu.pl/~zbyszek/asm/arm/assembler-intro.pdf)
+ * [Experimenting with GCC Linker](https://www.robopenguins.com/linker-exploration/)
+ * [Special ELF Sections](https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/specialsections.html)
+ * [Proper way to debug 16-Bit Code on QEmu + GDB](https://gist.github.com/Theldus/4e1efc07ec13fb84fa10c2f3d054dccd)
+
+
 ## Requirements
 The project has been developed using an Arch Linux system, but it should work on any OS where the following tools are available
  * Bash Shell for some scripts
- * Commandline tools like dd
+ * Commandline tools like dd and sudo
  * mkfs.fat to create a file system
  * [GNU Toolchain](https://gcc.gnu.org/) incl. gcc, gas, ld and gdb
  * [QEmu](https://www.qemu.org/) for x86 System
