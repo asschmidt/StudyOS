@@ -191,6 +191,8 @@ As usual, some linker options are defined. The different options will be describ
 > * It provides debugging information for GDB when we want to debug our bootloader on source level
 > * If the Linker is used to generate directly a raw binary, the "Garbage Collection" of unused function sections is not working and therefore the resulting binary contains all code (even if it is not used)
 
+Beside the input object files, which are obviously dependencies for the ELF binary, the `executable()` function also takes an additional `link_depends` and `link_whole` parameter. The `link_depends` parameter specifies a simple dependcy to the linker file. Therefore, the link process is also started when the Linker file has changed. The `link_whole`parameter specifies a list of libraries which should be linked to the target. These libraries are therefore also a dependency.
+
 The second build target `stage1_link_bin` is used to create a raw binary file for the Stage 1 Bootloader out of the generated ELF binary. As already mentioned, this has the advantage that the Linker is able to optimize the ELF binary and provide debug information. For the raw binary we only extract specific sections from the ELF binary with the help of the tool `objcopy` and the usage of a Meson custom target with the function `custom_target()`
 
 The Meson function `executable()` (used to create the ELF binary) uses the GCC Linker and not directly `ld`. Therefore, the Linker options must be specified with a different command line syntax.
@@ -199,18 +201,18 @@ If there is a `-Wl,<SomeOption>`, this setting is directly for the Linker which 
 ### Linker Options for ELF Targets
 The following table list the used Linker Options for the ELF target of the Stage 1 Bootloader
 
-| Options                | Description                        |
-| ---------------------- | ---------------------------------- |
-| `-Wl,-melf_i386`       | Instructs the Linker to generate a 32-bit ELF target for x86 |
-| `-Wl,--gc-sections`    | Instructs the Linker to perform garbage collection of unused sections and remove them from ELF binary |
-| `-g`                   | Keep Debug-Information in the ELF binary |
-| `--function-sections`  | Option for GCC (in case we compile C-Sourcefiles for the target), to generate a separate section for each function. This is needed for a working garbage collection of the Linker |
-| `--data-sections`      | Option for GCC (in case we compile C-Sourcefiles for the target), to generate a separate section for each global variable. This is needed for a working garbage collection of the Linker |
-| `-nodefaultlibs`       | Prevents the GCC Linker to link standard system libraries |
-| `-nostdlib`            | Prevents the GCC Linker to link standard system startup files |
-| `-nostartfiles`        | Prevents the GCC Linker to link standard system startup files |
-| `-nolibc`              | Prevents the GCC Linker to link standard C library |
-| `-Os`                  | Set the optimization level for the C-Compiler to _optimize for size_ |
+| Options                        | Description                                       |
+| ------------------------------ | ------------------------------------------------- |
+| `-Wl,-melf_i386`               | Instructs the Linker to generate a 32-bit ELF target for x86 |
+| `-Wl,--gc-sections`            | Instructs the Linker to perform garbage collection of unused sections and remove them from ELF binary |
+| `-g`                           | Keep Debug-Information in the ELF binary |
+| `--function-sections`          | Option for GCC (in case we compile C-Sourcefiles for the target), to generate a separate section for each function. This is needed for a working garbage collection of the Linker |
+| `--data-sections`              | Option for GCC (in case we compile C-Sourcefiles for the target), to generate a separate section for each global variable. This is needed for a working garbage collection of the Linker |
+| `-nodefaultlibs`               | Prevents the GCC Linker to link standard system libraries |
+| `-nostdlib`                    | Prevents the GCC Linker to link standard system startup files |
+| `-nostartfiles`                | Prevents the GCC Linker to link standard system startup files |
+| `-nolibc`                      | Prevents the GCC Linker to link standard C library |
+| `-Os`                          | Set the optimization level for the C-Compiler to _optimize for size_ |
 
 
 ## Using Meson
