@@ -37,9 +37,10 @@ enum BOOT_INDICATOR : u8 {
 // IDs based on https://aeb.win.tue.nl/partitions/partition_types-1.html
 //
 enum SYSTEM_ID : u8 {
-    Empty       = 0x00,     // No System ID specified
-    DOS_FAT12   = 0x01,     // DOS 12 Bit FAT
-    DOS_FAT16   = 0x04      // DOS 16 Bit FAT
+    Empty        = 0x00,     // No System ID specified
+    DOS_FAT12    = 0x01,     // DOS 12 Bit FAT
+    DOS_FAT16    = 0x04,     // DOS 16 Bit FAT
+    WIN95_FAT16  = 0x0E      // WIN95: DOS 16-bit FAT, LBA-mapped
 };
 
 //
@@ -60,29 +61,6 @@ union CHS_ADDRESS {
 };
 
 //
-// Structure for the Boot-Code of the Bootsector
-//
-struct BOOT_SECTOR_CODE {
-    u8 code[440];           // Byte Array of the Boot-Code
-};
-
-//
-// Helper Functions
-//
-namespace format {
-
-    //
-    // Format the CHS Address based on the single-byte values
-    //
-    fn formatCHS(CHS_ADDRESS chsAddress) {
-        u32 adrResult = 0x0;
-
-        adrResult = (chsAddress.adr[2] << 16) | (chsAddress.adr[1] << 8) | chsAddress.adr[0];
-        return adrResult;
-    };
-}
-
-//
 // Structure for a Partition Table Entry
 // The Partition Table in the Bootsector consists of 4 Partition Table Entries
 //
@@ -93,6 +71,13 @@ struct PARTITION_TABLE_ENTRY {
     CHS_ADDRESS chsAddressOfEnd;                // CHS Address for the End of the Partition
     u32 lbaStart;                               // LBA Address for the Start of the Parition
     u32 numberOfSectors;                        // Number of Sectors in the Partition
+};
+
+//
+// Structure for the Boot-Code of the Bootsector
+//
+struct BOOT_SECTOR_CODE {
+    u8 code[440];           // Byte Array of the Boot-Code
 };
 
 //
