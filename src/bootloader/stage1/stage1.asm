@@ -12,9 +12,7 @@
  * bootloader must not contain any hard-coded partition table and
  * signature bytes
 */
-
 .intel_syntax noprefix
-.code16
 
 .include "common_defines.asm"
 .include "bios_defines.asm"
@@ -86,11 +84,11 @@ stage1Main:
     /* Get the address of first partition table entry in MBR */
     mov si, OFFSET _mbr_address + MBR_PART_TABLE_OFFSET
 
-.partitionTabCopyLoop:
+.stage1Main_partTabCopyLoop:
     lodsw							    /* Load the first 2 byte of the Partition Table from MBR*/
     stosw							    /* Store it in the global structure */
     sub cx, 2						    /* Decrement the read counter by 2 bytes */
-    jnz .partitionTabCopyLoop           /* If still bytes to copy, go back to loop */
+    jnz .stage1Main_partTabCopyLoop     /* If still bytes to copy, go back to loop */
 
     /* Determine the parition and sector information to load Stage2 bootloader */
     mov di, OFFSET DISK_INFO
@@ -105,7 +103,7 @@ stage1Main:
     mov es, bx
     mov bx, OFFSET _boot_stage2_offset	/* Setup the Offset for Stage 2 */
 
-.stage2LoadLoop:
+.stage1Main_stage2LoadLoop:
     /* AX=LBA Address, DI=Pointer to DISK_INFO structure */
     call diskConvToCHS          		/* We get CX = Cylinder, DH = Head, DL = Sector */
 
@@ -120,10 +118,10 @@ stage1Main:
     dec si								/* Decrement the sector read counter */
     inc ax								/* Increment the sector address (LBA) -> next read */
     add bx, DEFAULT_SECTOR_SIZE 		/* Increment the pointer to the memory buffer by the sector size */
-    jnc .stage2CheckNextLoad            /* If we didn't get an overflow, loop again */
+    jnc .stage1Main_stage2CheckNextLoad /* If we didn't get an overflow, loop again */
 
     /* If we got an overflow, we need to switch the segment */
-.stage2UpdateSegment:
+.stage1Main_stage2UpdateSeg:
     mov bx, OFFSET _boot_stage2_offset	/* If we got an overflow, load the offset for Stage2 again */
     push ax								/* We use AX to modify ES, therefore save the current value */
     mov ax, es							/* Get the current segment */
@@ -131,11 +129,11 @@ stage1Main:
     mov es, ax							/* Set the new segment */
     pop ax								/* Restore old AX value */
 
-.stage2CheckNextLoad:
+.stage1Main_stage2CheckNextLoad:
     test si, si							/* Check for zero of our sector read counter */
-    jnz .stage2LoadLoop 				/* Loop till we read all sectors */
+    jnz .stage1Main_stage2LoadLoop		/* Loop till we read all sectors */
 
-.stage2LoadDone:
+.stage1Main_stage2LoadDone:
     mov ax, 0                           /* */
     mov es, ax                          /* Reset the ES segement to 0 */
     jmp _boot_stage2_segment:0          /* Use stage 2 segement as new code segement */
