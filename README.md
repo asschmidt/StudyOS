@@ -20,7 +20,7 @@ As already mentioned, the primary development goal is not to develop the next OS
  * Learn something about the internals of simple file systems like FAT
 
 ## Information and Background Knowledge
-The following resource are really helpful and useful if you want to dive into the OS development and low level programming topics.
+The following resources are really helpful and useful if you want to dive into the OS development and low level programming topics.
  * [OSDev Wiki](https://wiki.osdev.org/Expanded_Main_Page)
  * [Writing a Bootloader from Scratch](https://www.cs.cmu.edu/~410-s07/p4/p4-boot.pdf)
  * [ELF File Format](https://github.com/compilepeace/BINARY_DISSECTION_COURSE/blob/master/ELF/ELF.md)
@@ -28,6 +28,18 @@ The following resource are really helpful and useful if you want to dive into th
  * [Experimenting with GCC Linker](https://www.robopenguins.com/linker-exploration/)
  * [Special ELF Sections](https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/specialsections.html)
  * [Proper way to debug 16-Bit Code on QEmu + GDB](https://gist.github.com/Theldus/4e1efc07ec13fb84fa10c2f3d054dccd)
+
+### StudyOS Documents
+I tried to document the internals of the different software components, details on the tools used for development and analysis and also provide some general background information about relevant topics. You can find the documents in the `doc/`sub-folder
+ * General Information
+   * [Coding Guidelines](doc/development/CodingGuidelines.md)
+   * [Bootsector](doc/development/Bootsector.md)
+   * [Floppy Disk Layout](doc/development/Floppy_Disk.md)
+ * Tools
+   * [Eclipse](doc/tools/Eclipse.md)
+   * [ImHex](doc/tools/ImHex.md)
+   * [Meson Build System](doc/tools/Meson.md)
+   * [QEmu System Emulator](doc/tools/QEmu.md)
 
 
 ## Requirements
