@@ -117,3 +117,24 @@ break *0x7C00
 Additionally, the script sets a breakpoint at the start address of the Stage 1 Bootloader where the BIOS will start the execution after loading it from Sector 1 of our disk image.
 
 We can also use this script later to load additional symbol files for debugging, if we want to debug Stage 1 and Stage 2 at the same time.
+
+## Start Debugging
+Before you can start the debugging session of the Stage 1 Bootloader in Real-Mode, you have to start QEmu with the correct configuration. After you started QEmu for Real-Mode, a QEmu window will pop-up and the Eclipse console shows some warning from QEmu due to the file format of the floppy image.
+
+![Eclipse QEmu Start Real Mode](../images/Eclipse_QEmu_Start.png)
+
+QEmu doesn't show any output from a BIOS or anything else regarding the boot process. The reason for this is, that we specified the option to wait for a debugger to connect and do not start the execution process directly after launch.
+
+As soon as QEmu is running and waiting of a debugger connection, we can launch the Eclipse Debug configuration for Real-Mode we already prepared. After a successfull connect of GDB to the QEmu remote target, Eclipse either asks to switch to the Debug Perspective or does this automatically. After Eclipse switched to the Debug perspective, you should get a more or less simular screen like the one in the following screenshot (the window layout might be different due to your personal configuration)
+
+![Eclipse Debug Launch Real Mode](../images/Eclipse_Start_Debug.png)
+
+As you can see, Eclipse has stopped with the Debugger at an position where the CPU will start the execution (usually the BIOS will start now and initializes the hardware). Now, if we continue with the Debugger, the CPU will start the execution of the BIOS code and the BIOS will initialize everything necessary for boot up, loads the first sector from the provided boot disk and jumps to the pre-defined execution position for the bootloader.
+
+![Eclipse Debug Toolbar](../images/Eclipse_Debug_Toolbar.png)
+
+To continue with the debugger, you just need to press the green "play button" in the debugger toolbar in Eclipse. As you might remember, we set a breakpoint in the GDB startup script at address `0x7C00`. This is the default address where the BIOS will load our bootloader and starts execution. That means, as soon as we hit continue in the debugger, we should stop at our breakpoint in the bootloader.
+
+![Eclipse Debug Stage 1 Start](../images/Eclipse_Debug_Stage1_Start.png)
+
+As you can see, we stopped at the first instruction of our Stage 1 bootloader. One important aspect here is, that we are currently debugging on Source-Level (even it is still assembler). This is possible because of the ELF binary with debug symbols we specified for the Debug-Configuration. Otherwise you would have to debug on a Disassembly level.
