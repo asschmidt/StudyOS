@@ -79,9 +79,10 @@ As soon as the boot image is created, the file system must be created on one of 
 > [!IMPORTANT]
 > This build commands runs a scripts which uses `sudo` to setup a loop-device and you have to enter your root password. Check `tools/scripts/generate_fat.sh` for more details.
 
-As soon as the floppy image including the file system is prepared, the different SW parts of the OS can be built. Hereby, the already disk image is used and updated. Therefore it is not needed to re-create the floppy for each build. Only after a `clean`, the floppy image and file system must be re-created
+As soon as the floppy image including the file system is prepared, the different SW parts of the OS can be built. Hereby, the already created disk image is used and updated. Therefore it is not needed to re-create the floppy for each build. Only after a `clean`, the floppy image and file system must be re-created
 
 For example, the following command builds the Stage 1 bootloader and writes it to the disk image.
+
 `$ ninja stage1`
 
 Possbile build targets are:
@@ -91,6 +92,7 @@ Possbile build targets are:
  * `fs`- Creates the file system on Boot Floppy partion
 
 To quickly test the Stage 1 Bootloader, the following command can be used to run QEmu with the generated disk image
+
 `$ qemu-system-i386 -fda boot_floppy.img -boot order=a -no-fd-bootchk -D ./log.txt`
 
 If only the Stage 1 bootloader was built, the following outputs should be visible on the QEmu window
