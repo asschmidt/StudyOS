@@ -3,7 +3,6 @@
  *
  *
  */
-
 .intel_syntax noprefix
 
 /*
@@ -12,10 +11,10 @@
  * void pmPrepareIDT(uint32_t* pIDTDesc, uint32_t* pIDT, uint16_t entryCount, int16_t segment);
  *
  * Parameters:
- *    SP + 8:  pIDTDesc
- *    SP + 12: pIDT
- *    SP + 16: entryCount
- *    SP + 20: segment
+ *    EBP + 8:  pIDTDesc
+ *    EBP + 12: pIDT
+ *    EBP + 16: entryCount
+ *    EBP + 20: segment
  *
  * Return:
  *    -
@@ -66,11 +65,11 @@ pmPrepareIDT:
  * void pmSetupIDTEntry(uint32_t* pIDT, uint8_t idtIdx, uin32_t pFunc, uint8_t typeAttribute, uint16_ segSelector);
  *
  *    Parameters:
- *      SP + 8:  pIDT
- *      SP + 12: idtIdx
- *      SP + 16: pFunc
- *      SP + 20: typeAttribute
- *      SP + 24: segSelector
+ *      EBP + 8:  pIDT
+ *      EBP + 12: idtIdx
+ *      EBP + 16: pFunc
+ *      EBP + 20: typeAttribute
+ *      EBP + 24: segSelector
  *
  *    Returns:
  *      EAX: Error Code (1=Error, 0=Success)

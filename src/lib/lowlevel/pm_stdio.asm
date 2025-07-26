@@ -6,7 +6,6 @@
  *
  *
  */
-
 .intel_syntax noprefix
 
 /* Include Common and BIOS defines */
@@ -19,8 +18,8 @@
  * void pmPutString(char* pString, int videoMemoryOffset);
  *
  * Parameters:
- *    BP + 8:  pString
- *    BP + 12: Offset address for Video Memory (due to GDT offset)
+ *    EBP + 8:  pString
+ *    EBP + 12: Offset address for Video Memory (due to GDT offset)
  *
  * Returns:
  *    -
@@ -28,7 +27,6 @@
  */
  .code32
 .section .text.pmPutString,"ax",@progbits
-.align 8
 .global pmPutString
 pmPutString:
     push ebp                                    /* Prepare Stack Frame */

@@ -7,8 +7,8 @@
 .intel_syntax noprefix
 
 
-.set PIC1_IO_ADDR, 0x20                 /* IO Port Address for PIC1 */
-.set PIC2_IO_ADDR, 0xA0                 /* IO Port Address for PIC2 */
+.set PIC1_IO_ADDR,      0x20            /* IO Port Address for PIC1 */
+.set PIC2_IO_ADDR,      0xA0            /* IO Port Address for PIC2 */
 
 .set PIC1_CMD_REG, PIC1_IO_ADDR         /* IO Port Address for PIC1 Command Register */
 .set PIC1_DATA_REG, PIC1_IO_ADDR + 1    /* IO Port Address for PIC1 Data Register */
@@ -44,7 +44,7 @@
  * void pmPICSendEOI(uint8_t irg);
  *
  * Parameters:
- *    BP + 8:  irq
+ *    EBP + 8:  irq
  *
  * Returns:
  *    -
@@ -85,8 +85,8 @@ pmPICSendEOI:
  * void pmPICRemap(int32_t offset1, int32 offset2);
  *
  * Parameters:
- *    BP + 8:  offset1
- *    BP + 12: offset2
+ *    EBP + 8:  offset1
+ *    EBP + 12: offset2
  *
  * Returns:
  *    -
@@ -188,7 +188,7 @@ pmPICRemap:
  * uint16_t pmPICReadIRQReg(uint8_t ocw3);
  *
  * Parameters:
- *    BP + 8:  ocw3
+ *    EBP + 8:  ocw3
  *
  * Returns:
  *    16 Bit value of PIC1 and PIC2 IRQ register
@@ -309,7 +309,7 @@ pmPICReadISR:
  * void pmPICSetMask(uint8_t irqLine);
  *
  * Parameters:
- *    BP + 8:  ocwirqLine
+ *    EBP + 8:  ocwirqLine
  *
  * Returns:
  *    -

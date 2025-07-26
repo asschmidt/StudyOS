@@ -3,7 +3,6 @@
  *
  *
  */
-
 .intel_syntax noprefix
 
 /*
@@ -12,10 +11,10 @@
  * void pmPrepareGDT(short gdtStartAddr, short gdtEndAddr, short segmentAdr, short* pGDTDesc);
  *
  *    Parameters:
- *      SP + 4:  gdtStartAddr
- *      SP + 6:  gdtEndAddr
- *      SP + 8:  segmentAddr
- *      SP + 10: pGDTDesc
+ *      BP + 4:  gdtStartAddr
+ *      BP + 6:  gdtEndAddr
+ *      BP + 8:  segmentAddr
+ *      BP + 10: pGDTDesc
  *
  *    Returns:
  *      -
@@ -62,7 +61,7 @@ pmPrepareGDT:
  * void pmReloadGDT(unsigned int* pGDTDesc);
  *
  * Parameters:
- *    BP + 4: pGDTDesc
+ *    EBP + 4: pGDTDesc
  *
  * Returns:
  *    -

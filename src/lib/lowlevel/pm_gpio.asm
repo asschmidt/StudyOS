@@ -4,7 +4,6 @@
  * This module provides functions to read/write ports on a x86
  *
  */
-
 .intel_syntax noprefix
 
 /*
@@ -13,8 +12,8 @@
  * void pmPortOutByte(uint16_t port, uint8_t value);
  *
  * Parameters:
- *    BP + 8:  port
- *    BP + 12: value
+ *    EBP + 8:  port
+ *    EBP + 12: value
  *
  * Returns:
  *    -
@@ -53,7 +52,7 @@ pmPortOutByte:
  * uint8_t pmPortInByte(uint16_t port);
  *
  * Parameters:
- *    BP + 8:  port
+ *    EBP + 8:  port
  *
  * Returns:
  *    AL: Read byte value
