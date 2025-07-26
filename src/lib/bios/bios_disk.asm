@@ -11,11 +11,6 @@
 .include "bios_defines.asm"
 
 /*
- * External Functions
- */
-.extern biosPutString
-
-/*
  * Read Disk information like Cylinder, Sector and Head count via BIOS INT 10h
  *
  * Parameter:

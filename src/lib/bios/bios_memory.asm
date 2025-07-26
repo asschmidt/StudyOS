@@ -5,9 +5,7 @@
  * Only usable in Real-Mode
  *
  */
-
 .intel_syntax noprefix
-.code16
 
 /*
  * Initialize the stack memory with a pattern
@@ -20,6 +18,7 @@
  * Returns:
  *   -
  */
+.code16
 .section .text.memInitStack,"ax",@progbits
 .global memInitStack
 memInitStack:
@@ -38,11 +37,11 @@ memInitStack:
     mov di, sp
     sub di, 2
 
-stack_init_loop:
+.stackInitLoop_memInitStack:
     mov es:[di], ax					    /* Store data in Stack (0xCDCD) */
     sub di, 2						    /* Decrement the write pointer */
     sub cx, 2						    /* Decrement the write counter */
-    jnz stack_init_loop				    /* If still bytes to write, go back to loop */
+    jnz .stackInitLoop_memInitStack     /* If still bytes to write, go back to loop */
 
     pop es
     pop di

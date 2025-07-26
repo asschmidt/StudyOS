@@ -137,18 +137,18 @@ biosPutString:
     push ax
     push bx
 
-.loop:
+.loop_biosPutString:
     lodsb
     or al, al
-    jz .done
+    jz .done_biosPutString
 
     mov ah, byte ptr 0x0E
     mov bh, byte ptr 0x00
     int 0x10
 
-    jmp .loop
+    jmp .loop_biosPutString
 
-.done:
+.done_biosPutString:
     pop bx
     pop ax
     pop si
