@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
     <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE" value="${none}"/>
-    <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/usr/bin/qemu-system-i386"/>
+    <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/home/andreas/OpenSource/qemu-10.0.0_patch/build/qemu-system-i386"/>
     <stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-s -S -fda boot_floppy.img -boot order=a -no-fd-bootchk -D ./log.txt"/>
     <stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/StudyOS/build}"/>
 </launchConfiguration>
