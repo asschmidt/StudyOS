@@ -46,4 +46,10 @@ $$C = \frac{LBA}{ST} / NH$$
 $$H = \frac{LBA}{ST} \mod{NH}$$
 $$S = (LBA \mod{ST}) + 1$$
 
-Hereby, $ST$ is the _Sector per Track_ parameter and $NH$ is the _Number of Heads_ parameter. $LBA$ is used to specify the LBA address which should be converted.
+The following parameter are used for the calculations
+
+| Parameter | Meaning           |
+| --------- | ----------------- |
+| $ST$      | Sector per Track. Number of sectors per track. Usually this is 18 |
+| $NH$      | Number of Heads. The number of heads for the disk drive. Usually this is 2 |
+| $LBA$     | Linear Block Address. The LBA for the specific sector |
