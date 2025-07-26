@@ -57,12 +57,15 @@ The project has been developed using an Arch Linux system, but it should work on
 The different parts of the OS (e.g. bootloader, kernel etc.) can be build using the [Meson Build System](https://mesonbuild.com/)
 
 Clone the StudyOS repository
+
 `$ git clone https://github.com/asschmidt/StudyOS.git`
 
 Change into the project directory
+
 `$ cd StudyOS`
 
 Now, run Meson to prepare the build. This creates a `build`directory including the prepared build files.
+
 `$ meson setup build`
 
 After the preparation of Meson, the build process can be started by changing into the `build` sub-directory and run Ninja. At first, the boot floppy image must be created.
