@@ -14,9 +14,9 @@
  * void* envMemCopy(uint8_t* pDst, uint8_t* pSrc, uint32_t n);
  *
  * Parameters:
- *    BP + 8:  pDst
- *    BP + 12: pSrc
- *    BP + 16: n
+ *    EBP + 8:  pDst
+ *    EBP + 12: pSrc
+ *    EBP + 16: n
  *
  * Returns:
  *    EAX: Pointer to destination memory
@@ -61,9 +61,9 @@ envMemCopy:
  * void* envMemSet(uint8_t* pDst, uint8_t value, uint32_t size);
  *
  * Parameters:
- *    BP + 8:  pDst
- *    BP + 12: value
- *    BP + 16: size
+ *    EBP + 8:  pDst
+ *    EBP + 12: value
+ *    EBP + 16: size
  *
  * Returns:
  *    EAX: Pointer to destination memory
