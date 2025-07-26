@@ -17,8 +17,8 @@ import hex.core;
 import std.io;
 import type.guid;
 
-#include "/home/andreas/Projects/boottest/tools/imhex/mbr.hexpat"
-#include "/home/andreas/Projects/boottest/tools/imhex/vbr.hexpat"
+#include "/home/andreas/OpenSource/StudyOS/tools/imhex/mbr.hexpat"
+#include "/home/andreas/OpenSource/StudyOS/tools/imhex/vbr.hexpat"
 
 // Get current selection in Hex Editor
 hex::core::Selection sel = hex::core::get_selection();
