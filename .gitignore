@@ -7,3 +7,8 @@
 **/__pycache__/
 
 **/media/
+**/.vscode/
+**/.settings/
+
+.cproject
+.project
