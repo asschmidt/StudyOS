@@ -1,16 +1,16 @@
 # Stage 1 Bootloader
-In this document, the Stage 1 Bootloader for StudyOS is described. Hereby, a couple of background information are provided. However, is is assumed that the following topics are more or less known
+In this document, the Stage 1 Bootloader for StudyOS is described. Hereby, a couple of background information are provided. However, it is assumed that the following topics are more or less known
  * Real-Mode and Protected-Mode
- * x86 Segemented Memory wiht Segment-Register
+ * x86 Segmented Memory with Segment-Register
 
 ## PC Startup
-After a reset or power-cycle, the i8086 processor starts the execution allways on a specific address. This is, written as linear address, the address `0xFFFF0` which is the same address as the address `0xFFFF:0x00000`. This segment address is loaded in the Code-Segment register and the Instruction Pointer whereby the `CS` register (Code Segment) is loaded with `0xFFFF` and the `IP` register (Instruction Pointer) is loaded with `0x0000`.
+After a reset or power-cycle, the i8086 processor starts the execution always on a specific address. This is, written as linear address, the address `0xFFFF0` which is the same address as the address `0xFFFF:0x00000`. This segment address is loaded in the Code-Segment register and the Instruction Pointer whereby the `CS` register (Code Segment) is loaded with `0xFFFF` and the `IP` register (Instruction Pointer) is loaded with `0x0000`.
 
 You can easily prove that both addresses are the same, by calculating for example the linear address of `0xFFFF:0x0000` with the following calculation:
 
 LinearAddress = (Segment-Address * 16) + Offset
 
-Hereby, the Segment-Address is the value in the `CS` register and the offset if the value in the `IP` register. Putting those numbers in, we get
+Hereby, the Segment-Address is the value in the `CS` register and the offset is the value in the `IP` register. Putting those numbers in, we get
 
 LinearAddress = (0xFFFF * 16) + 0x0000 = 0xFFFF0 + 0x0000 = 0xFFFF0
 
