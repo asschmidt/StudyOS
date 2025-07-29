@@ -13,16 +13,17 @@ The following BDA table is copied from https://web.archive.org/web/2022112721495
 | 0Eh 	      | 14 	       | POST 	      | 2 bytes    | Base I/O address for parallel port 4 (printer port 4 - LPT 4)                  |
 | 10h 	      | 16 	       | Int 11h 	  | 2 bytes    | **Equipment Word**                                                             |
 |             |            |              |            |    Bits 15-14 indicate the number of parallel ports installed                  |
-|             |            |              |            |    00b = 1 parallel port                                                       |
-|             |            |              |            |    01b = 2 parallel ports                                                      |
-|             |            |              |            |    03b = 3 parallel ports                                                      |
+|             |            |              |            |    00b = 0 parallel port                                                       |
+|             |            |              |            |    01b = 1 parallel port                                                       |
+|             |            |              |            |    10b = 2 parallel ports                                                      |
+|             |            |              |            |    11b = 3 parallel ports                                                      |
 |             |            |              |            |    Bits 13-12 are reserved                                                     |
 |             |            |              |            |    Bits 11-9 indicate the number of serial ports installed                     |
 |             |            |              |            |    000b = none                                                                 |
 |             |            |              |            |    001b = 1 serial port                                                        |
-|             |            |              |            |    002b = 2 serial ports                                                       |
-|             |            |              |            |    003b = 3 serial ports                                                       |
-|             |            |              |            |    004b = 4 serial ports                                                       |
+|             |            |              |            |    010b = 2 serial ports                                                       |
+|             |            |              |            |    011b = 3 serial ports                                                       |
+|             |            |              |            |    100b = 4 serial ports                                                       |
 |             |            |              |            |    Bit 8 is reserved                                                           |
 |             |            |              |            |    Bit 7-6 indicate the number of floppy drives installed                      |
 |             |            |              |            |    0b = 1 floppy drive                                                         |
@@ -42,59 +43,60 @@ The following BDA table is copied from https://web.archive.org/web/2022112721495
 |             |            |              |            |    Bit 0 indicated if a boot floppy is installed                               |
 |             |            |              |            |    0b = not installed                                                          |
 |             |            |              |            |   1b = installed                                                               |
-| 12h 	      | 18         | POST 	      | 1 byte 	    | Interrupt flag - Manufacturing test                                           |
-| 13h 	      | 19 	       | Int 12h 	  | 2 bytes     | Memory size in Kb                                                             |
-| 15h 	      | 21 	       |              | 2 bytes     | Error codes for AT+; Adapter memory size for PC and XT                        |
-| 17h         | 22         | Int 16h      | 1 byte      | Keyboard shift flags 1
-                                                            Bit 7 indicates if Insert is on or off
-                                                            0b = Insert off
-                                                            1b = Insert on
-                                                            Bit 6 indicates if CapsLock is on or off
-                                                            0b = CapsLock off
-                                                            1b - CapsLock on
-                                                            Bit 5 indicates if NumLock is on or off
-                                                            0b = NumLock off
-                                                            1b = NumLock on
-                                                            Bit 4 indicates if ScrollLock is on or off
-                                                            0b = ScrollLock off
-                                                            1b = ScrollLock on
-                                                            Bit 3 indicates if the Alt key is up or down
-                                                            0b = Alt key is up
-                                                            1b = Alt key is down
-                                                            Bit 2 indicates if the Control key is up or down
-                                                            0b = Control key is up
-                                                            1b = Control key is down
-                                                            Bit 1 indicates if the Left Shift key is up or down
-                                                            0b = Left Shift key is up
-                                                            1b = Left Shift key is down
-                                                            Bit 0 indicates if the Right Shift key is up or down
-                                                            0b = Right Shift key is up
-                                                            1b = Right Shift key is down                                                |
-| 18h 	23 	Int 16h 	1 byte 	Keyboard shift flags 2
-                        Bit 7 indicates if the Insert key is up or down
-                        0b = Insert key is up
-                        1b = Insert key is down
-                        Bit 6 indicates if the CapsLock key is up or down
-                        0b = CapsLock is key is up
-                        1b = CapsLock key is down
-                        Bit 5 indicates if the NumLock key is up or down
-                        0b = NumLock key is up
-                        1b = Numlock key is down
-                        Bit 4 indicates if the ScrollLock key is up or down
-                        0b = ScrollLock key is up
-                        1b = ScrollLock key is down
-                        Bit 3 indicates if the Pause key is active or inactive
-                        0b = pause key is inactive
-                        1b = Pause key is active
-                        Bit 2 indicates if the SysReg key is up or down
-                        0b = SysReg key is up
-                        1b = SysReg key is down
-                        Bit 1 indicates if the Left Alt key is up or down
-                        0b = Left Alt key is up
-                        1b = Left Alt key is down
-                        Bit 0 indicates if the Right Alt key is up or down
-                        0b = Right Alt key is up
-                        1b = Right Alt key is down
+| 12h 	      | 18         | POST 	      | 1 byte 	   | Interrupt flag - Manufacturing test                                            |
+| 13h 	      | 19 	       | Int 12h 	  | 2 bytes    | Memory size in Kb                                                              |
+| 15h 	      | 21 	       |              | 2 bytes    | Error codes for AT+; Adapter memory size for PC and XT                         |
+| 17h         | 22         | Int 16h      | 1 byte     | Keyboard shift flags 1                                                         |
+|             |            |              |            |   Bit 7 indicates if Insert is on or off                                       |
+|             |            |              |            |   0b = Insert off                                                              |
+|             |            |              |            |   1b = Insert on                                                               |
+|             |            |              |            |   Bit 6 indicates if CapsLock is on or off                                     |
+|             |            |              |            |   0b = CapsLock off                                                            |
+|             |            |              |            |   1b - CapsLock on                                                             |
+|             |            |              |            |   Bit 5 indicates if NumLock is on or off                                      |
+|             |            |              |            |   0b = NumLock off                                                             |
+|             |            |              |            |   1b = NumLock on                                                              |
+|             |            |              |            |   Bit 4 indicates if ScrollLock is on or off                                   |
+|             |            |              |            |   0b = ScrollLock off                                                          |
+|             |            |              |            |   1b = ScrollLock on                                                           |
+|             |            |              |            |   Bit 3 indicates if the Alt key is up or down                                 |
+|             |            |              |            |   0b = Alt key is up                                                           |
+|             |            |              |            |   1b = Alt key is down                                                         |
+|             |            |              |            |   Bit 2 indicates if the Control key is up or down                             |
+|             |            |              |            |   0b = Control key is up                                                       |
+|             |            |              |            |   1b = Control key is down                                                     |
+|             |            |              |            |   Bit 1 indicates if the Left Shift key is up or down                          |
+|             |            |              |            |   0b = Left Shift key is up                                                    |
+|             |            |              |            |   1b = Left Shift key is down                                                  |
+|             |            |              |            |   Bit 0 indicates if the Right Shift key is up or down                         |
+|             |            |              |            |   0b = Right Shift key is up                                                   |
+|             |            |              |            |   1b = Right Shift key is down                                                 |
+| 18h 	      | 23         | Int 16h      | 1 byte     | Keyboard shift flags 2                                                         |
+|             |            |              |            |   Bit 7 indicates if the Insert key is up or down                              |
+|             |            |              |            |   0b = Insert key is up                                                        |
+|             |            |              |            |   1b = Insert key is down                                                      |
+|             |            |              |            |   Bit 6 indicates if the CapsLock key is up or down                            |
+|             |            |              |            |   0b = CapsLock is key is up                                                   |
+|             |            |              |            |   1b = CapsLock key is down                                                    |
+|             |            |              |            |   Bit 5 indicates if the NumLock key is up or down                             |
+|             |            |              |            |   0b = NumLock key is up                                                       |
+|             |            |              |            |   1b = Numlock key is down                                                     |
+|             |            |              |            |   Bit 4 indicates if the ScrollLock key is up or down                          |
+|             |            |              |            |   0b = ScrollLock key is up                                                    |
+|             |            |              |            |   1b = ScrollLock key is down                                                  |
+|             |            |              |            |   Bit 3 indicates if the Pause key is active or inactive                       |
+|             |            |              |            |   0b = pause key is inactive                                                   |
+|             |            |              |            |   1b = Pause key is active                                                     |
+|             |            |              |            |   Bit 2 indicates if the SysReg key is up or down                              |
+|             |            |              |            |   0b = SysReg key is up                                                        |
+|             |            |              |            |   1b = SysReg key is down                                                      |
+|             |            |              |            |   Bit 1 indicates if the Left Alt key is up or down                            |
+|             |            |              |            |   0b = Left Alt key is up                                                      |
+|             |            |              |            |   1b = Left Alt key is down                                                    |
+|             |            |              |            |   Bit 0 indicates if the Right Alt key is up or down                           |
+|             |            |              |            |   0b = Right Alt key is up                                                     |
+|             |            |              |            |   1b = Right Alt key is down                                                   |
+
 | 19h 	24 	Int 09h 	1 byte 	Alt Numpad work area
 | 1Ah 	26 	Int 16h 	2 bytes 	Pointer to the address of the next character in the keyboard buffer
 | 1Ch 	28 	Int 16h 	2 bytes 	Pointer to the address of the last character in he keyboard buffer
