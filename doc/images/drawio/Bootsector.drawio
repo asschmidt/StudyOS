@@ -1,0 +1,28 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0" version="28.0.7">
+  <diagram name="Page-1" id="6yiEXeobdyQ1pd30pBFU">
+    <mxGraphModel dx="653" dy="564" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-1" value="&lt;div&gt;Code&lt;/div&gt;&lt;div&gt;440 Byte&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0a30a;fontColor=#000000;strokeColor=#BD7000;" vertex="1" parent="1">
+          <mxGeometry x="80" y="120" width="360" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-2" value="&lt;div&gt;Partition Table&amp;nbsp;&lt;/div&gt;&lt;div&gt;64 Byte&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-3" value="&lt;div&gt;Signature&lt;/div&gt;&lt;div&gt;2 Byte&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" vertex="1" parent="1">
+          <mxGeometry x="380" y="400" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-4" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;flipH=1;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="450" y="120" width="20" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-5" value="512 Byte" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="470" y="275" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="DJzS9t-b9ORB3_71ErWD-6" value="Bootsector" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="230" y="90" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
