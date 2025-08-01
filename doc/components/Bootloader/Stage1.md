@@ -4,7 +4,7 @@ In this document, the Stage 1 Bootloader for StudyOS is described. Hereby, a cou
  * x86 Segmented Memory with Segment-Register
 
 ## PC Startup
-After a reset or power-cycle, the i8086 processor starts the execution always on a specific address. This is, written as linear address, the address `0xFFFF0` which is the same address as the address `0xFFFF:0x00000`. This segment address is loaded in the Code-Segment register and the Instruction Pointer whereby the `CS` register (Code Segment) is loaded with `0xFFFF` and the `IP` register (Instruction Pointer) is loaded with `0x0000`.
+After a reset or power-cycle, the i8086 processor starts the execution always on a specific address. This is, written as linear address, the address `0xFFFF0` which is the same address as the address `0xFFFF:0x00000` written with a segment part and an offset. This address is loaded in the Code-Segment register and the Instruction Pointer, whereby the `CS` register (Code Segment) is loaded with `0xFFFF` and the `IP` register (Instruction Pointer) is loaded with `0x0000`.
 
 You can easily prove that both addresses are the same, by calculating for example the linear address of `0xFFFF:0x0000` with the following calculation:
 
@@ -14,7 +14,7 @@ Hereby, the Segment-Address is the value in the `CS` register and the offset is 
 
 LinearAddress = (0xFFFF * 16) + 0x0000 = 0xFFFF0 + 0x0000 = 0xFFFF0
 
-Looking at a standard memory map of a PC, we can clearly see, that the address where the processor starts the execution is located in the "Motherboard BIOS" section.
+Looking at a standard memory map of a PC, we can clearly see, that the address, where the processor starts the execution, is located in the "Motherboard BIOS" section.
 
 ![PC Memory Map](../../images/PC_Memory_Map.png)
 

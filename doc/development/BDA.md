@@ -12,41 +12,41 @@ The following BDA table is copied from https://web.archive.org/web/2022112721495
 | 0Ch 	      | 12 	       | Int 17h 	  | 2 bytes    | Base I/O address for parallel port 3 (printer port 3 - LPT 3)                  |
 | 0Eh 	      | 14 	       | POST 	      | 2 bytes    | Base I/O address for parallel port 4 (printer port 4 - LPT 4)                  |
 | 10h 	      | 16 	       | Int 11h 	  | 2 bytes    | **Equipment Word**                                                             |
-|             |            |              |            |    Bits 15-14 indicate the number of parallel ports installed                  |
-|             |            |              |            |    00b = 0 parallel port                                                       |
-|             |            |              |            |    01b = 1 parallel port                                                       |
-|             |            |              |            |    10b = 2 parallel ports                                                      |
-|             |            |              |            |    11b = 3 parallel ports                                                      |
-|             |            |              |            |    Bits 13-12 are reserved                                                     |
-|             |            |              |            |    Bits 11-9 indicate the number of serial ports installed                     |
-|             |            |              |            |    000b = none                                                                 |
-|             |            |              |            |    001b = 1 serial port                                                        |
-|             |            |              |            |    010b = 2 serial ports                                                       |
-|             |            |              |            |    011b = 3 serial ports                                                       |
-|             |            |              |            |    100b = 4 serial ports                                                       |
-|             |            |              |            |    Bit 8 is reserved                                                           |
-|             |            |              |            |    Bit 7-6 indicate the number of floppy drives installed                      |
-|             |            |              |            |    0b = 1 floppy drive                                                         |
-|             |            |              |            |    1b = 2 floppy drives                                                        |
-|             |            |              |            |    Bits 5-4 indicate the video mode                                            |
-|             |            |              |            |    00b = EGA or later                                                          |
-|             |            |              |            |    01b = color 40x25                                                           |
-|             |            |              |            |    10b = color 80x25                                                           |
-|             |            |              |            |    11b = monochrome 80x25                                                      |
-|             |            |              |            |    Bit 3 is reserved                                                           |
-|             |            |              |            |    Bit 2 indicates if a PS/2 mouse is installed                                |
-|             |            |              |            |    0b = not installed                                                          |
-|             |            |              |            |    1b = installed                                                              |
-|             |            |              |            |    Bit 1 indicated if a math coprocessor is installed                          |
-|             |            |              |            |    0b = not installedinstalled                                                 |
-|             |            |              |            |    1b = installed                                                              |
-|             |            |              |            |    Bit 0 indicated if a boot floppy is installed                               |
-|             |            |              |            |    0b = not installed                                                          |
+|             |            |              |            |   Bits 15-14 indicate the number of parallel ports installed                   |
+|             |            |              |            |   00b = 0 parallel port                                                        |
+|             |            |              |            |   01b = 1 parallel port                                                        |
+|             |            |              |            |   10b = 2 parallel ports                                                       |
+|             |            |              |            |   11b = 3 parallel ports                                                       |
+|             |            |              |            |   Bits 13-12 are reserved                                                      |
+|             |            |              |            |   Bits 11-9 indicate the number of serial ports installed                      |
+|             |            |              |            |   000b = none                                                                  |
+|             |            |              |            |   001b = 1 serial port                                                         |
+|             |            |              |            |   010b = 2 serial ports                                                        |
+|             |            |              |            |   011b = 3 serial ports                                                        |
+|             |            |              |            |   100b = 4 serial ports                                                        |
+|             |            |              |            |   Bit 8 is reserved                                                            |
+|             |            |              |            |   Bit 7-6 indicate the number of floppy drives installed                       |
+|             |            |              |            |   0b = 1 floppy drive                                                          |
+|             |            |              |            |   1b = 2 floppy drives                                                         |
+|             |            |              |            |   Bits 5-4 indicate the video mode                                             |
+|             |            |              |            |   00b = EGA or later                                                           |
+|             |            |              |            |   01b = color 40x25                                                            |
+|             |            |              |            |   10b = color 80x25                                                            |
+|             |            |              |            |   11b = monochrome 80x25                                                       |
+|             |            |              |            |   Bit 3 is reserved                                                            |
+|             |            |              |            |   Bit 2 indicates if a PS/2 mouse is installed                                 |
+|             |            |              |            |   0b = not installed                                                           |
+|             |            |              |            |   1b = installed                                                               |
+|             |            |              |            |   Bit 1 indicated if a math coprocessor is installed                           |
+|             |            |              |            |   0b = not installedinstalled                                                  |
+|             |            |              |            |   1b = installed                                                               |
+|             |            |              |            |   Bit 0 indicated if a boot floppy is installed                                |
+|             |            |              |            |   0b = not installed                                                           |
 |             |            |              |            |   1b = installed                                                               |
 | 12h 	      | 18         | POST 	      | 1 byte 	   | Interrupt flag - Manufacturing test                                            |
 | 13h 	      | 19 	       | Int 12h 	  | 2 bytes    | Memory size in Kb                                                              |
 | 15h 	      | 21 	       |              | 2 bytes    | Error codes for AT+; Adapter memory size for PC and XT                         |
-| 17h         | 22         | Int 16h      | 1 byte     | Keyboard shift flags 1                                                         |
+| 17h         | 22         | Int 16h      | 1 byte     | **Keyboard shift flags 1**                                                     |
 |             |            |              |            |   Bit 7 indicates if Insert is on or off                                       |
 |             |            |              |            |   0b = Insert off                                                              |
 |             |            |              |            |   1b = Insert on                                                               |
@@ -71,7 +71,7 @@ The following BDA table is copied from https://web.archive.org/web/2022112721495
 |             |            |              |            |   Bit 0 indicates if the Right Shift key is up or down                         |
 |             |            |              |            |   0b = Right Shift key is up                                                   |
 |             |            |              |            |   1b = Right Shift key is down                                                 |
-| 18h 	      | 23         | Int 16h      | 1 byte     | Keyboard shift flags 2                                                         |
+| 18h 	      | 23         | Int 16h      | 1 byte     | **Keyboard shift flags 2**                                                     |
 |             |            |              |            |   Bit 7 indicates if the Insert key is up or down                              |
 |             |            |              |            |   0b = Insert key is up                                                        |
 |             |            |              |            |   1b = Insert key is down                                                      |
@@ -96,40 +96,39 @@ The following BDA table is copied from https://web.archive.org/web/2022112721495
 |             |            |              |            |   Bit 0 indicates if the Right Alt key is up or down                           |
 |             |            |              |            |   0b = Right Alt key is up                                                     |
 |             |            |              |            |   1b = Right Alt key is down                                                   |
-
-| 19h 	24 	Int 09h 	1 byte 	Alt Numpad work area
-| 1Ah 	26 	Int 16h 	2 bytes 	Pointer to the address of the next character in the keyboard buffer
-| 1Ch 	28 	Int 16h 	2 bytes 	Pointer to the address of the last character in he keyboard buffer
-| 1Eh 	60 	Int 16h 	32 bytes 	Keyboard buffer
-| 3Eh 	61 	Int 13h 	1 byte 	Floppy disk drive calibration status
-                        Bits 7-4 are reserved
-                        Bit 3 = floppy drive 3 (PC, XT)
-                        Bit 2 = floppy drive 2 (PC, XT)
-                        Bit 1 = floppy drive 1
-                        Bit 0 = floppy drive 0
-                        0b indicates not calibrated
-                        1b indicates calibrated
-| 3Fh 	62 	Int 13h 	1 byte 	Floppy disk drive motor status
-                        Bit 7 indicates current operation
-                        0b = read or verify operation
-                        1b = write or format operation
-                        Bit 6 is not used
-                        Bit 5-4 indicates drive select
-                        00b = Drive 0
-                        01b = Drive 1
-                        10b = Drive 2 (PC, XT)
-                        11b = Drive 4 (PC, XT)
-                        Bit 3 indicates drive 3 motor
-                        0b = motor off
-                        1b = motor on
-                        Bit 2 indicates drive 2 motor
-                        0b = motor off
-                        1b = motor on
-                        Bit 1 indicates drive 0 motor
-                        0b = motor off
-                        1b = motor on
-                        0b = motor off
-                        1b = motor on
+| 19h         | 24         | Int 09h      | 1 byte     | Alt Numpad work area                                                           |
+| 1Ah         | 26         | Int 16h      | 2 bytes    | Pointer to the address of the next character in the keyboard buffer            |
+| 1Ch         | 28         | Int 16h      | 2 bytes    | Pointer to the address of the last character in he keyboard buffer             |
+| 1Eh         | 60         | Int 16h      | 32 bytes   | Keyboard buffer                                                                |
+| 3Eh         | 61         | Int 13h      | 1 byte     | **Floppy disk drive calibration status**                                       |
+|             |            |              |            |   Bits 7-4 are reserved                                                        |
+|             |            |              |            |   Bit 3 = floppy drive 3 (PC, XT)                                              |
+|             |            |              |            |   Bit 2 = floppy drive 2 (PC, XT)                                              |
+|             |            |              |            |   Bit 1 = floppy drive 1                                                       |
+|             |            |              |            |   Bit 0 = floppy drive 0                                                       |
+|             |            |              |            |   0b indicates not calibrated                                                  |
+|             |            |              |            |   1b indicates calibrated                                                      |
+| 3Fh         | 62         | Int 13h      | 1 byte     | **Floppy disk drive motor status**                                             |
+|             |            |              |            |   Bit 7 indicates current operation                                            |
+|             |            |              |            |   0b = read or verify operation                                                |
+|             |            |              |            |   1b = write or format operation                                               |
+|             |            |              |            |   Bit 6 is not used                                                            |
+|             |            |              |            |   Bit 5-4 indicates drive select                                               |
+|             |            |              |            |   00b = Drive 0                                                                |
+|             |            |              |            |   01b = Drive 1                                                                |
+|             |            |              |            |   10b = Drive 2 (PC, XT)                                                       |
+|             |            |              |            |   11b = Drive 4 (PC, XT)                                                       |
+|             |            |              |            |   Bit 3 indicates drive 3 motor                                                |
+|             |            |              |            |   0b = motor off                                                               |
+|             |            |              |            |   1b = motor on                                                                |
+|             |            |              |            |   Bit 2 indicates drive 2 motor                                                |
+|             |            |              |            |   0b = motor off                                                               |
+|             |            |              |            |   1b = motor on                                                                |
+|             |            |              |            |   Bit 1 indicates drive 0 motor                                                |
+|             |            |              |            |   0b = motor off                                                               |
+|             |            |              |            |   1b = motor on                                                                |
+|             |            |              |            |   0b = motor off                                                               |
+|             |            |              |            |   1b = motor on                                                                |
 | 40h 	63 	Int 13h 	1 byte 	Floppy disk drive motor time-out
 | 41h 	64 	Int 13h 	1 byte 	Floppy disk drive status
                         Bit 7 indicates drive ready status
