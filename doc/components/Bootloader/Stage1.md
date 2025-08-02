@@ -194,7 +194,7 @@ SECTIONS
         /* Insert all .text.* input sections */
     	*(.text);
         *(.text.*);
-   	} > BOOTLOADER AT > BOOTLOADER
+   	} > BOOTLOADER
 
     /* .rodata section containing the read-only (constant) data */
 	.rodata :
@@ -216,4 +216,227 @@ SECTIONS
 	} > BOOTLOADER
 ```
 
-Two important aspects are configured in the section definition. The first one is: In which memory area the section should go and the second one is: What content should be in that section.
+Two important aspects are configured in the section definition. The first one is, in which memory area the section should go and the second one is, what content should be in that section. In the snippet of the Linker Script above, only sections which are located in the `BOOTLOADER` memory area are shown. That is the memory part in the system RAM where the BIOS will load the bootsector. As it can be seen, beside the `.text` section containing the executable code, also the `.data` and `.rodata` sections are located in this memory area.
+
+The next snippet shows two additional sections of the bootloader which are located in the `BOOTLOADER_RAM` area and the `BOOTLOADER_STACK` area.
+
+```
+/* .bss section used to store uninitialized variables */
+	.bss :
+   	{
+        . = ALIGN(4);
+
+        /* Define a symbol to mark the start of the .bss section */
+   		_bss_start = .;
+
+        /*
+         * Insert all .bss input sections
+         * Hereby, only space is reserved and no actual data is stored in the ELF
+         * binary for this section.
+         */
+    	*(.bss);
+
+        /* Define a symbol to mark the end of the .bss section */
+    	_bss_end = .;
+
+        . = ALIGN(4);
+	} > BOOTLOADER_RAM
+
+    /*
+     * Calculate the start for the .stack section based on the RAM memory size and the
+     * configured stack size. The .stack section is moved to the end of the RAM region
+     */
+    _stack_section_start = ALIGN(ORIGIN(BOOTLOADER_STACK) + LENGTH(BOOTLOADER_STACK) - _boot_stack_size, 4);
+    .stack _stack_section_start :
+    {
+        . = ALIGN(4);
+
+        _boot_stack_end  = .;
+
+        /* The fill-bytes are not stored in the binary */
+        FILL(0xCD);
+
+        . = ORIGIN(BOOTLOADER_STACK) + LENGTH(BOOTLOADER_STACK) - 1;
+
+        /*
+         * This start symbol represents the linera address of the last usable stack address.
+         * Therefore this symbol cannot directly be used for stack handling of the processor
+         * because the stack area is put and the end of the conventional address space which
+         * cannot be addressed by a single 16 bit address
+         */
+        _boot_stack_start = .;
+
+        . = ALIGN(4);
+    } > BOOTLOADER_STACK
+```
+It is important to know, that these section will not contain any loadable content in the ELF binary or `.bin` file. These sections are only used for address calculations of the linker. The Linker must assign each and every variable in the program a valid memory address. For this, the Linker performs the address calculation based on the start address (given in this example with `BOOTLOADER_RAM`and `BOOTLOADER_STACK`) and the content of the section.
+
+## Bootloader Code
+The Stage 1 Bootloader itself is pretty simple and performs the following tasks:
+ * Initializes the basic memory initialization for Data- and Extra-Segment
+ * Initializes the Stack-Segement and sets up the Stack-Pointer
+ * Initializes the Code-Segment
+ * Initializes the Stack memory section with a pre-defined pattern
+ * Collects information about the disk geometry and reads the partition table
+ * Loads the Stage 2 partition into the configured memory area
+ * Jumps to Stage 2 code
+
+### Memory Initialization
+The first three points from the list above are covered in a pretty short list of assembly instructions. The following code snippet shows this part of the bootloader code
+
+```gas
+stage1Start:
+    cli		                		    /* Disable all interrupts */
+    xor ax, ax	            		    /* Zero out AX register */
+    mov ds, ax              		    /* Initialize the DataSegement to 0 */
+    mov es, ax              		    /* Initialize the Extra Segement to 0 */
+
+    mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
+    mov ss, ax              		    /* Initialize the Stack Segement to _boot_stack_segment */
+
+    /* Initialize the Stack Pointer */
+    mov sp, OFFSET _boot_stack_start_offset
+    mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
+    push bp                 		    /* We save BP with the original SP value on stack */
+
+    jmp 0:stage1Main          		    /* Far jump to main to set CS (Code Segement) register */
+```
+The first instruction of the bootloader is `cli` to disable all interrupts. This is necessary because the BIOS has already initialized some peripherals and interrupts which could interfere with the following initialization. Therefore, we disable them.
+
+The initialization the Data- and Extra-Segment is just setting the `DS` and `ES` register to 0.
+
+```gas
+    xor ax, ax	            		    /* Zero out AX register */
+    mov ds, ax              		    /* Initialize the DataSegement to 0 */
+    mov es, ax              		    /* Initialize the Extra Segement to 0 */
+```
+
+The initialization of the Stack-Segement and Stack-Pointer is also straight forward. At first, the `SS` register must be set to the segment address for the stack segment. This address is calculated in the Linker Script.
+
+```gas
+    mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
+    mov ss, ax              		    /* Initialize the Stack Segement to _boot_stack_segment */
+
+    /* Initialize the Stack Pointer */
+    mov sp, OFFSET _boot_stack_start_offset
+    mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
+    push bp                 		    /* We save BP with the original SP value on stack */
+```
+
+As you might remember, in the Linker Script there were some symbols defined which are related to the stack memory.
+
+```
+/*
+ * Defines the linear address and size of the Stack for Stage1 Bootloader.
+ *
+ * Remark: This is an address > than 16 Bit and must be recalculated in segement/
+ * offset pair for usage in the bootloader code. The Linker can handle the adress
+ * calculations for the stack with more than 16 Bit.
+ */
+BOOT_STACK_ADR      = 0x7FC00;
+BOOT_STACK_SIZE     = 1K;
+
+/*
+ * Define the offset for the stack segment (Offset 0x400 = 1 KiB --> Last address in Stack)
+ * and calculate the corresponding segment for the physical address of the stack
+ * based on the chosen offset
+ */
+BOOT_STACK_OFFSET   = 0x0;
+BOOT_STACK_SEGMENT  = (BOOT_STACK_ADR - BOOT_STACK_OFFSET) / 16;
+.
+.
+.
+/* Define the size of the Stack used by the Stage1 Bootloader */
+_boot_stack_offset  = BOOT_STACK_OFFSET;
+_boot_stack_segment = BOOT_STACK_SEGMENT;
+_boot_stack_size    = BOOT_STACK_SIZE;
+```
+
+Hereby, the `boot_stack_offset` is set to `0x00` and the `boot_stack_segment` is calculated based on the linear address set in `BOOT_STACK_ADR`. So doing the math, we can easily calculate which value is stored in the `SS` register. First, we derive the calculation of the segment address from the basic formula
+
+`LinearAddress = (Segment-Address * 16) + Offset` ==> `Segment-Address = (LinearAddress - Offset) / 16`
+
+If we put in the values from the Linker Script (that is, the linear address for the stack memory and the offset), we get the following value for our boot stack segment.
+
+`_boot_stack_segment = (0x7FC00 - 0x00) / 16 = 0x7FC0`
+
+But this part only initializes the segment register for the stack but not the stack pointer itself. This is done with the following code  section.
+
+```gas
+    /* Initialize the Stack Pointer */
+    mov sp, OFFSET _boot_stack_start_offset
+    mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
+    push bp                 		    /* We save BP with the original SP value on stack */
+```
+Hereby, the stack pointer `SP` is set to the offset address of the boot stack. And this is the part where it might get a bit tricky. At first we must know, that the x86 processor uses a so called _full decending stack_. That means, if the processor executes a `push` operation, the stack pointer is first decremented by the word size (in Real-Mode this is 16 Bit) and then the value is stored at this address. From this behaviour, the name _full decending stack_ is derived.
+
+**Full** means, the stack pointer points to the last written location in the stack and this memory address holds the last pushed value and is therefore _full_ (used).
+
+**Decending** means, that the stack pointer is decremented for each `push` operation and incremented for each `pop` operation. In contrast to this behaviour, an _increasing_ stack would increment for a `push` and decrement for a `pop`. Due to the _decending_ behaviour, the stack pointer starts at a higher address and is decreased the more `push` operations are performed. Therefore, it is often said, that the _stack grows downwards_.
+
+To place our down-growing stack in memory, I decided to put it just below the EBDA area (see [Memory Map](#memory-map)). The EBDA area starts at the linear address `0x80000`. Based on the fact, that the stack is _full decending_, we have to set our starting address for the stack on the first address **outside** the stack memory area we want to use. Remeber, the stack pointer is **first** decdremented and then the value is stored.
+
+In our Linker Script we defined the `BOOTSTACK_SIZE` to be 1 KiB which is 1024 Bytes. Calculating the hex representation of 1024 we get `0x400`. So our stack size is `0x400`bytes.
+
+With these information, we can easily calculate the memory address of the stack section for our linker. We need to keep in mind, that the linker starts with an address for a section, puts the content in it and while doing this, the internal address counter of the linker is **incremented**. For this reason, we need to provide the **lowest** address of the stack memory section to the Linker as a starting address. To get this, we can calculate the address like the following
+
+`LowestStackAddress = FirstStackAddress - SizeOfStack`
+
+If we put in our already known numbers, we get the following
+
+`LowestStackAddress = 0x80000 - 0x400 = 0x7FC00`
+
+![Stack Memory Area](../../images/PC_Memory_Map_Bootloader_Stack.drawio.png)
+
+And this is the address we see in the Linker Script as memory address for the beginning of the stack memory area. But this wasn't complicated enough. The next challenge is to consider the segmented memory model from the x86 because if you look closely at the address `0x80000` you might realize, that this address doesn't fit into 16 Bit and therefore you need to split this linear address into a segment and offset part. But we already did the preparation of this. The stack segment register `SS` already contains the address `0x7FC0` and we can now use the `SP` just with an offset value to navigate in this memory segment from `0x00` to `0x3FE`.
+
+### Initialize Stack Memory
+For debugging reasons it is very helpful to see which stack memory has been used and how many bytes are still available in the stack. To accomplish this, we can just prepare the complete stack memory with a pre-defined data pattern and check during the debugging which memory locations have alreay a value that differs from our pattern. With this information we can easily calculate how many bytes are used respectively free.
+
+The Stage 1 Bootloader performs this initialization and write the pattern `0xCDCD` into every memory location in the stack memory area. The following code snippet shows this part of the initialization
+
+```gas
+stage1Main:
+    sti			            		    /* Enable all interrupts */
+    mov [BOOT_DRV], dl	    		    /* remember the boot device */
+
+    /* Initialize Stack Area for Stack-Monitoring*/
+    mov ax, STACK_PATTERN   		    /* Pattern used to initialize the RAM Stack */
+    mov bx, OFFSET _boot_stack_segment  /* Get the stack segement to use it with the ES register */
+    mov cx, OFFSET _boot_stack_size	    /* Get the size of the Stack memory */
+
+    /* AX=Pattern, BX=Segment, CX=Size of stack */
+    call memInitStack
+
+```
+
+Side note: We enable now the interrupts again and for later use we store the boot device number we got from BIOS before we continue. This code section is pretty straight forward. It just prepares some values for a function call to `memInitStack`and calls the function. Hereby, the function needs the stack segment address and the size but also the pattern we want to write to the memory. The `memInitStack` function is also pretty simple because it just contains a write loop which iterates over the addresses in the segment starting at offset `0x00` until `size` is reached.
+
+```gas
+memInitStack:
+    push di
+    push es
+
+    /* Set the extra segment register to use with the specified stack segment */
+    mov es, bx
+
+    /* Get the current stack pointer. This is where the stack init starts to avoid overwriting
+     * already stored values on the stack
+     * We need to subtract 2 byte, because the x86 uses full-decending stack and therefore the
+     * SP still points to the last written memory address
+     */
+    mov di, sp
+    sub di, 2
+
+.stackInitLoop_memInitStack:
+    mov es:[di], ax					    /* Store data in Stack (0xCDCD) */
+    sub di, 2						    /* Decrement the write pointer */
+    sub cx, 2						    /* Decrement the write counter */
+    jnz .stackInitLoop_memInitStack     /* If still bytes to write, go back to loop */
+
+    pop es
+    pop di
+
+    ret
+
+```
