@@ -73,8 +73,8 @@ BOOT_RAM_ADR        = 0x0500;
 BOOT_RAM_SIZE       = 28K;
 
 /*
- * Defines the address (offset and segment) and size of the Stack for Stage1
- * Bootloader.
+ * Defines the linear address and size of the Stack for Stage1 Bootloader.
+ *
  * Remark: This is an address > than 16 Bit and must be recalculated in segement/
  * offset pair for usage in the bootloader code. The Linker can handle the adress
  * calculations for the stack with more than 16 Bit.
