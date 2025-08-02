@@ -349,7 +349,7 @@ pmPICSetMask:
     /* mask = oldMask | (1 << irqLine) */
     mov ecx, edi
     mov edi, 1
-    shl edi, ecx
+    shl edi, cl
     or eax, edi
 
     /* Write Mask value to PIC */
