@@ -63,7 +63,7 @@ lib_bios_asm_gen = generator(gas,
                 '-o', '@OUTPUT@'])
 
 lib_bios_asm_preproc = generator(cpp,
-    output: '@BASENAME@.i',
+    output: '@BASENAME@.i.asm',
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '@INPUT@',
@@ -101,7 +101,7 @@ lib_lowlevel_asm_gen = generator(gas,
                 '-o', '@OUTPUT@'])
 
 lib_lowlevel_asm_preproc = generator(cpp,
-    output: '@BASENAME@.i',
+    output: '@BASENAME@.i.asm',
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
@@ -143,7 +143,7 @@ lib_env_asm_gen = generator(gas,
                 '-o', '@OUTPUT@'])
 
 lib_env_asm_preproc = generator(cpp,
-    output: '@BASENAME@.i',
+    output: '@BASENAME@.i.asm',
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
@@ -183,7 +183,7 @@ stage1_asm_gen = generator(gas,
                 '-o', '@OUTPUT@'])
 
 stage1_asm_preproc = generator(cpp,
-    output: '@BASENAME@.i',
+    output: '@BASENAME@.i.asm',
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
@@ -265,7 +265,7 @@ stage2_asm_gen = generator(gas,
                 '-o', '@OUTPUT@'])
 
 stage2_asm_preproc = generator(cpp,
-    output: '@BASENAME@.i',
+    output: '@BASENAME@.i.asm',
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
