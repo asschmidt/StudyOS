@@ -15,6 +15,52 @@ As the image shows, there are two partitions on the floppy disk. I know, usually
 > [!IMPORTANT]
 > The picture uses zero-based indexing of the sectors because the tool `parted`, which I used to create the partitions, uses zero-based sector indexing. The sector adressing with the BIOS uses one-based sector indexing!
 
+The script to generate the boot disk can be found in [Floppy Image Script](../../tools/scripts/generate_floppy.sh). This script uses the tools `dd` and `parted` to create the disk image file and the partition table.
+
+```bash
+echo "Generating Image-File with 1,44 MiB"
+dd if=/dev/zero of=$1 bs=512 count=2880 >/dev/null
+
+echo "Creating Partition Table"
+parted -s $1 mktable msdos
+echo "Creating Bootloader Stage 2 Partition"
+parted -s $1 -- mkpart primary fat16 1s 256s
+echo "Creating Kernel & FAT12 Filesystem Partition"
+parted -s $1 -- mkpart primary fat16 257s -1s
+#parted -s $1 set on boot 0
+fdisk -lu $1
+```
+
+The `dd` command is used to create a binary file, filled with zeros in the size of a 1,44 MiB floppy disk. As the commandline parameter for `dd` show, we use a blocksize of 512 Bytes (which corresponds to the size of one disk sector) and a block count of 2880 (which corresponds to the number of sectors on the 1,44 MiB floppy disk).
+
+After the empty disk image has been created, the partition table and the partitions themself are created with `parted`. It is by intention, that there is no filesystem specified. The `generate_floppy.sh` script is just creating a raw image with raw paritions.
+
+The parameter used for `parted` specify the sector start and end numbers for the partitions. Hereby, the alignment is, from the performance perspective, not optimal, but for our purposes it should be fine. This deviation is also reported by `parted` when creating the partitions.
+
+```
+[1/1] Generating floppy with a custom command
+Generating Image-File with 1,44 MiB
+2880+0 records in
+2880+0 records out
+1474560 bytes (1.5 MB, 1.4 MiB) copied, 0.00559536 s, 264 MB/s
+Creating Partition Table
+Creating Bootloader Stage 2 Partition
+Warning: The resulting partition is not properly aligned for best performance: 1s % 2048s != 0s
+Creating Kernel & FAT12 Filesystem Partition
+Warning: The resulting partition is not properly aligned for best performance: 257s % 2048s != 0s
+Disk boot_floppy.img: 1.41 MiB, 1474560 bytes, 2880 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x3b02f421
+
+Device           Boot Start   End Sectors  Size Id Type
+boot_floppy.img1          1   256     256  128K  e W95 FAT16 (LBA)
+boot_floppy.img2        257  2879    2623  1.3M  e W95 FAT16 (LBA)
+
+```
+
 ## Bootloader Stage 1
 The Stage 1 bootloader is located in the Master Boot Record and will be automatically loaded and executed by the BIOS during startup. The MBR is restricted to one sector and therefore the size is limited to 512 Byte. As shown in more detail in the [Bootsector](../development/Bootsector.md) document, the actual available size for bootloader code is only 440 Byte due to additional data like the partition table and other data bytes.
 
