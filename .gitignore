@@ -2,6 +2,7 @@
 *.elf
 *.o
 *.img
+*.bkp
 
 **/.cache/
 **/__pycache__/
