@@ -8,7 +8,7 @@
 .intel_syntax noprefix
 
 /* Include BIOS Defines */
-.include "bios_defines.asm"
+#include "bios_defines.asm"
 
 /* The GDT uses an own section in ELF binary */
 .section .gdt,"a",@progbits

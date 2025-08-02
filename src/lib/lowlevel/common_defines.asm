@@ -3,20 +3,22 @@
  * e.g. Real Mode or Protected Mode
  *
  */
+#ifndef _COMMON_DEFINES_ASM_
+#define _COMMON_DEFINES_ASM_
 
 .intel_syntax noprefix
 
 /* Sector size in Bytes */
-.set DEFAULT_SECTOR_SIZE,                           512
+#define DEFAULT_SECTOR_SIZE                           512
 
-.set IDT_ENTRY_SIZE,                                8
-.set IDT_ENTRY_COUNT,                               256
+#define IDT_ENTRY_SIZE                                8
+#define IDT_ENTRY_COUNT                               256
 
 /* Offset of the Partition Table in the MBR */
-.set MBR_PART_TABLE_OFFSET,                         0x1BE
+#define MBR_PART_TABLE_OFFSET                         0x1BE
 
 /* Address of the Video Memory for Text-Display */
-.set VIDEO_MEMORY,                                  0xB8000
+#define VIDEO_MEMORY                                  0xB8000
 
 /*
  * Partition Table Entry Structure
@@ -32,13 +34,13 @@
  * };                                   // 16 Byte
  *
  */
-.set PART_TABLE_ENTRY_SIZE,                         16
-.set PART_TABLE_ENTRY_DRIVE_ATTRIBUTES_OFFSET,      0
-.set PART_TABLE_ENTRY_CHS_PART_START_OFFSET,        1
-.set PART_TABLE_ENTRY_PART_TYPE_OFFSET,             4
-.set PART_TABLE_ENTRY_CHS_PART_END_OFFSET,          5
-.set PART_TABLE_ENTRY_LBA_START_OFFSET,             8
-.set PART_TABLE_ENTRY_NUM_SECTORS_OFFSET,           12
+#define PART_TABLE_ENTRY_SIZE                         16
+#define PART_TABLE_ENTRY_DRIVE_ATTRIBUTES_OFFSET      0
+#define PART_TABLE_ENTRY_CHS_PART_START_OFFSET        1
+#define PART_TABLE_ENTRY_PART_TYPE_OFFSET             4
+#define PART_TABLE_ENTRY_CHS_PART_END_OFFSET          5
+#define PART_TABLE_ENTRY_LBA_START_OFFSET             8
+#define PART_TABLE_ENTRY_NUM_SECTORS_OFFSET           12
 
 
-
+#endif

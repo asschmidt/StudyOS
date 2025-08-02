@@ -9,9 +9,9 @@
 
 .intel_syntax noprefix
 
-.include "common_defines.asm"
+#include "common_defines.asm"
 /* Include BIOS defines */
-.include "bios_defines.asm"
+#include "bios_defines.asm"
 
 /*
  * External Symbols

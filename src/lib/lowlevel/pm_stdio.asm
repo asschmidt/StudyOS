@@ -9,8 +9,8 @@
 .intel_syntax noprefix
 
 /* Include Common and BIOS defines */
-.include "common_defines.asm"
-.include "bios_defines.asm"
+#include "common_defines.asm"
+#include "bios_defines.asm"
 
 /*
  * Prints a string by directly writing to Video Memory

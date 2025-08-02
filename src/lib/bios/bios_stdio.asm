@@ -9,7 +9,7 @@
 .intel_syntax noprefix
 
 /* Include the BIOS defines */
-.include "bios_defines.asm"
+#include "bios_defines.asm"
 
 
 /*

@@ -8,7 +8,7 @@
 .intel_syntax noprefix
 
 /* Include BIOS defines */
-.include "bios_defines.asm"
+#include "bios_defines.asm"
 
 /*
  * Read Disk information like Cylinder, Sector and Head count via BIOS INT 10h
