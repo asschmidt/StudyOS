@@ -1,4 +1,4 @@
-project('BootTest', 'c', 'cpp', version: '0.0.1', meson_version: '1.8.2')
+project('BootTest', 'c', 'cpp', version: '0.0.1', meson_version: '1.8.3')
 
 
 ###############################################################################
@@ -19,6 +19,7 @@ lib_env_inc = '../' + lib_env_dir
 gas = find_program('as')            # GNU Assembler
 ld = find_program('ld')             # GNU Natvie Linker
 gcc = find_program('gcc')           # GNU C Compiler
+cpp = find_program('cpp')           # GNU C Preprocessor
 dd = find_program('dd')             # dd Tool
 objcopy = find_program('objcopy')   # objcopy Tool
 bash = find_program('bash')         # Bash Shell
@@ -41,6 +42,8 @@ gas_args_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
 # 32 Bit (not 64 Bit by default)
 gcc_args_32bit = ['-g', '-m32']
 
+cpp_args = ['-P', '-CC', '-nostdinc', '-traditional-cpp']
+
 ###############################################################################
 # Support Targets to generate Images/Floppy/Filesystem
 ###############################################################################
@@ -57,6 +60,13 @@ lib_bios_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+lib_bios_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Setup the C-Source Files for the BIOS Lib
 lib_bios_c_source_files = files(lib_bios_dir + 'bios_structs.c')
 
@@ -65,8 +75,11 @@ lib_bios_source_files = files(lib_bios_dir + 'bios_stdio.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_disk.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_memory.asm')
 
+# Preprocess the ASM files
+lib_bios_preproc_files = lib_bios_asm_preproc.process(lib_bios_source_files)
+
 # Assemble the ASM source files to object files
-lib_bios_object_files = lib_bios_asm_gen.process(lib_bios_source_files)
+lib_bios_object_files = lib_bios_asm_gen.process(lib_bios_preproc_files)
 
 # Create the static library for liblowlevel
 lib_bios = static_library('bios',
@@ -85,6 +98,14 @@ lib_lowlevel_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+lib_lowlevel_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '-I', lib_lowlevel_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Setup the C-Source Files for the Lowlevel Lib
 lib_lowlevel_c_source_files = files(lib_lowlevel_dir + 'common_structs.c')
 
@@ -95,11 +116,11 @@ lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_idt.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_gpio.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_pic.asm')
 
-# Generate ASM Sources files based on the C-Sources
-# lib_lowlevel_source_files += asm_code_gen.process(lib_bios_api_c_source_files)
+# Preprocess the ASM files
+lib_lowlevel_preproc_files = lib_lowlevel_asm_preproc.process(lib_lowlevel_source_files)
 
 # Assemble the ASM source files to object files
-lib_lowlevel_object_files = lib_lowlevel_asm_gen.process(lib_lowlevel_source_files)
+lib_lowlevel_object_files = lib_lowlevel_asm_gen.process(lib_lowlevel_preproc_files)
 
 # Create the static library for liblowlevel
 lib_lowlevel = static_library('lowlevel',
@@ -119,6 +140,14 @@ lib_env_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+lib_env_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '-I', lib_lowlevel_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Setup the C-Source Files for the Env Lib
 lib_env_c_source_files = files(lib_env_dir + 'env_structs.c')
 #lib_env_c_source_files += files(lib_env_dir + 'common_structs.c')
@@ -126,8 +155,11 @@ lib_env_c_source_files = files(lib_env_dir + 'env_structs.c')
 # Setup the ASM-Source Files for the Env Lib
 lib_env_source_files = files(lib_env_dir + 'memory.asm')
 
+# Preprocess the ASM files
+lib_env_preproc_files = lib_env_asm_preproc.process(lib_env_source_files)
+
 # Assemble the ASM source files to object files
-lib_env_object_files = lib_env_asm_gen.process(lib_env_source_files)
+lib_env_object_files = lib_env_asm_gen.process(lib_env_preproc_files)
 
 # Create the static library for liblowlevel
 lib_env = static_library('env',
@@ -148,6 +180,14 @@ stage1_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+stage1_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '-I', lib_lowlevel_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Define the output filenames for Stage1 Raw Binary incl. a Map file
 stage1_bin_output       = 'boot_stage1_bin'
 stage1_bin_output_map   = stage1_bin_output + '.map'
@@ -162,9 +202,11 @@ stage1_elf_output_map   = stage1_elf_output + '.map'
 stage1_source_dir   = 'src/bootloader/stage1/'
 stage1_source_files = files(stage1_source_dir + 'stage1.asm')
 
+# Preprocess the ASM files
+stage1_preproc_files = stage1_asm_preproc.process(stage1_source_files)
 
 # Generate the Object Files for Stage1
-stage1_object_files = stage1_asm_gen.process(stage1_source_files)
+stage1_object_files = stage1_asm_gen.process(stage1_preproc_files)
 
 #
 # Setup Linker related options
@@ -220,6 +262,15 @@ stage2_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+stage2_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '-I', lib_lowlevel_inc,
+                '-I', lib_env_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Define the output filenames for Stage2 Raw Binary incl. a Map file
 stage2_bin_output       = 'boot_stage2_bin'
 stage2_bin_output_map   = stage2_bin_output + '.map'
@@ -238,9 +289,11 @@ stage2_source_files += files(stage2_source_dir + 'stage2_idt.asm')
 stage2_source_files += files(stage2_source_dir + 'kernel_gdt.asm')
 stage2_source_files += files(stage2_source_dir + 'pm.asm')
 
+# Preprocess the ASM files
+stage2_preproc_files = stage2_asm_preproc.process(stage2_source_files)
 
 # Generate the Object Files for Stage2
-stage2_object_files = stage2_asm_gen.process(stage2_source_files)
+stage2_object_files = stage2_asm_gen.process(stage2_preproc_files)
 
 #
 # Setup Linker related options
@@ -361,5 +414,7 @@ alias_target('stage1', [stage1_update_floppy])
 # Alias Target to build the Stage2 bootloader and put it on the partition on the disk
 alias_target('stage2', [stage2_update_floppy])
 
-alias_target('biosapi', [lib_lowlevel])
+alias_target('biosapi', [lib_bios])
+alias_target('lowlevelapi', [lib_lowlevel])
+alias_target('envapi', [lib_env])
 
