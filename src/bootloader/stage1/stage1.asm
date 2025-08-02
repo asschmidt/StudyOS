@@ -45,7 +45,8 @@ stage1Start:
     mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
     mov ss, ax              		    /* Initialize the Stack Segement to _boot_stack_segment */
 
-    mov sp, OFFSET _boot_stack_start_offset	/* Initialize the Stack Pointer */
+    /* Initialize the Stack Pointer */
+    mov sp, OFFSET _boot_stack_start_offset
     mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
     push bp                 		    /* We save BP with the original SP value on stack */
 
@@ -56,7 +57,7 @@ stage1Main:
     mov [BOOT_DRV], dl	    		    /* remember the boot device */
 
     /* Initialize Stack Area for Stack-Monitoring*/
-    mov ax, 0xCDCD					    /* Pattern used to initialize the RAM Stack */
+    mov ax, STACK_PATTERN   		    /* Pattern used to initialize the RAM Stack */
     mov bx, OFFSET _boot_stack_segment  /* Get the stack segement to use it with the ES register */
     mov cx, OFFSET _boot_stack_size	    /* Get the size of the Stack memory */
 
@@ -66,7 +67,7 @@ stage1Main:
     mov si, OFFSET MSG_REAL_MODE
 
     /* SI=Pointer to String */
-    call biosPutString                      /* Print a Loading... message to screen */
+    call biosPutString                  /* Print a Loading... message to screen */
 
     /* Read the Disk Information */
     mov dl, BYTE PTR [BOOT_DRV]         /* Get the drive we booted from */
@@ -74,7 +75,7 @@ stage1Main:
     mov si, OFFSET MSG_READ_FAILED      /* Pointer to error message in case of disk issues */
 
     /* DL=Disk Number, DI=Pointer to DISK_INFO struct, SI=Pointer to Error Message */
-    call biosDiskGetInfo                    /* Read disk info and populate global DISK_INFO structure */
+    call biosDiskGetInfo                /* Read disk info and populate global DISK_INFO structure */
 
     /* Get the first partition table entry to get CHS addresses for reading */
     /* Get the size of the struct */
@@ -166,7 +167,7 @@ MSG_READ_FAILED:        .asciz "Loading of Stage 2 failed\r\n"
 .section .bss
 
 /*
- * Reserve space for a DISC_INFO_STRUCT
+ * Reserve space for a DISC_INFO_STRUCT and Partition Table Entries
  *
 */
 DISK_INFO:              .space DISK_INFO_STRUCT_SIZE

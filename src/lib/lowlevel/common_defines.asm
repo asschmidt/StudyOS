@@ -9,16 +9,20 @@
 .intel_syntax noprefix
 
 /* Sector size in Bytes */
-#define DEFAULT_SECTOR_SIZE                           512
+#define DEFAULT_SECTOR_SIZE             512
 
-#define IDT_ENTRY_SIZE                                8
-#define IDT_ENTRY_COUNT                               256
+#define STACK_PATTERN                   0xCDCD
+#define STACK_END_PATTERN               0xABAB
+
+/* Interrupt Descriptor Table Data */
+#define IDT_ENTRY_SIZE                  8
+#define IDT_ENTRY_COUNT                 256
 
 /* Offset of the Partition Table in the MBR */
-#define MBR_PART_TABLE_OFFSET                         0x1BE
+#define MBR_PART_TABLE_OFFSET           0x1BE
 
 /* Address of the Video Memory for Text-Display */
-#define VIDEO_MEMORY                                  0xB8000
+#define VIDEO_MEMORY                    0xB8000
 
 /*
  * Partition Table Entry Structure
