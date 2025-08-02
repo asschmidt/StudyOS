@@ -26,7 +26,6 @@ memInitStack:
     push es
 
     /* Set the extra segment register to use with the specified stack segment */
-    mov bx, OFFSET _boot_stack_segment
     mov es, bx
 
     /* Get the current stack pointer. This is where the stack init starts to avoid overwriting
