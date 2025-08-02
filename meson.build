@@ -42,6 +42,8 @@ gas_args_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
 # 32 Bit (not 64 Bit by default)
 gcc_args_32bit = ['-g', '-m32']
 
+#
+# GNU Pre-Processor Arguments for Assembler-Usage
 cpp_args = ['-P', '-CC', '-nostdinc', '-traditional-cpp']
 
 ###############################################################################

@@ -33,6 +33,7 @@ The next section defines the tools used to build the necessary artifacts. This c
 gas = find_program('as')            # GNU Assembler
 ld = find_program('ld')             # GNU Natvie Linker
 gcc = find_program('gcc')           # GNU C Compiler
+cpp = find_program('cpp')           # GNU C Preprocessor
 dd = find_program('dd')             # dd Tool
 objcopy = find_program('objcopy')   # objcopy Tool
 bash = find_program('bash')         # Bash Shell
@@ -59,6 +60,10 @@ gas_args_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
 # Debug Infos -g
 # 32 Bit (not 64 Bit by default)
 gcc_args_32bit = ['-g', '-m32']
+
+#
+# GNU Pre-Processor Arguments for Assembler-Usage
+cpp_args = ['-P', '-CC', '-nostdinc', '-traditional-cpp']
 ```
 The parameter for the assembler are used for nearly all assembly processes during the build. As it can be seen, the settings cover the activation of Debug-Information, setting the target CPU architecture and specifying the default syntax.
 
@@ -78,6 +83,13 @@ lib_bios_asm_gen = generator(gas,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
+lib_bios_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i',
+    arguments: [cpp_args,
+                '-I', lib_bios_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
 # Setup the C-Source Files for the BIOS Lib
 lib_bios_c_source_files = files(lib_bios_dir + 'bios_structs.c')
 
@@ -86,8 +98,11 @@ lib_bios_source_files = files(lib_bios_dir + 'bios_stdio.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_disk.asm')
 lib_bios_source_files += files(lib_bios_dir + 'bios_memory.asm')
 
+# Preprocess the ASM files
+lib_bios_preproc_files = lib_bios_asm_preproc.process(lib_bios_source_files)
+
 # Assemble the ASM source files to object files
-lib_bios_object_files = lib_bios_asm_gen.process(lib_bios_source_files)
+lib_bios_object_files = lib_bios_asm_gen.process(lib_bios_preproc_files)
 
 # Create the static library for liblowlevel
 lib_bios = static_library('bios',
