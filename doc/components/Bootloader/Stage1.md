@@ -440,3 +440,23 @@ memInitStack:
     ret
 
 ```
+
+To see the code snippet for the stack memory in action, I've provided some screenshots. The following screenshot shows the important register values just before the call of `memInitStack`.
+
+![Stack Init Register](../../images/Stage1_Debug_StackInit_Register.png)
+
+As it can be seen in the screenshot, the register `AX` contains the pattern we want to write (in our case `0xCDCD`), the register `BX` contains the segment address for the stack memory and the register `CX` contains the size of the stack.
+
+If we take a look at a part of the memory of the stack **before** the call of `memInitStack` we see the following memory content
+
+![Before Stack Init Memory](../../images/Stage1_Debug_StackInit_Memory_Before.png)
+
+The memory window of the debugger shows an excerpt of the stack memory region. That the complete memory content is zero is due to the usage of QEmu as emulator. QEmu initializes the RAM of the emulated machine to zero. On a real hardware this is not the case!
+
+Directly after calling the function `memInitStack`, the debugger shows the content of the same memory area, but this time it is initialized to our pattern value `0xCDCD`
+
+![After Stack Init Memory](../../images/Stage1_Debug_StackInit_Memory_After.png.png)
+
+> [!NOTE]
+> You might have noticed the strange memory expression in the memory viewer of the debugger. As the investigated memory address it is written `0x7FC0 * 16`. The reason for this is: Our debugger only knows the linear address space and can also access this address space directly in the emulator. Therefore we have to provide a linear address and this is calculated by `LinearAdr = (SegmentAdr * 16) + Offset`. In our case we chose offset to zero, therefore `LinearAdr = SegmentAdr * 16` is enough for the memory view.
+
