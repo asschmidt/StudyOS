@@ -37,29 +37,29 @@
 .section .text
 .global stage1Start
 stage1Start:
-    cli		                		    /* Disable all interrupts */
-    xor ax, ax	            		    /* Zero out AX register */
-    mov ds, ax              		    /* Initialize the DataSegement to 0 */
-    mov es, ax              		    /* Initialize the Extra Segement to 0 */
+    cli                                 /* Disable all interrupts */
+    xor ax, ax                          /* Zero out AX register */
+    mov ds, ax                          /* Initialize the DataSegement to 0 */
+    mov es, ax                          /* Initialize the Extra Segement to 0 */
 
     mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
-    mov ss, ax              		    /* Initialize the Stack Segement to _boot_stack_segment */
+    mov ss, ax                          /* Initialize the Stack Segement to _boot_stack_segment */
 
     /* Initialize the Stack Pointer */
     mov sp, OFFSET _boot_stack_start_offset
-    mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
-    push bp                 		    /* We save BP with the original SP value on stack */
+    mov bp, sp                          /* Initialize the Base Pointer used in Stack Frames */
+    push bp                             /* We save BP with the original SP value on stack */
 
-    jmp 0:stage1Main          		    /* Far jump to main to set CS (Code Segement) register */
+    jmp 0:stage1Main                    /* Far jump to main to set CS (Code Segement) register */
 
 stage1Main:
-    sti			            		    /* Enable all interrupts */
-    mov [BOOT_DRV], dl	    		    /* remember the boot device */
+    sti                                 /* Enable all interrupts */
+    mov [BOOT_DRV], dl                  /* remember the boot device */
 
     /* Initialize Stack Area for Stack-Monitoring*/
-    mov ax, STACK_PATTERN   		    /* Pattern used to initialize the RAM Stack */
+    mov ax, STACK_PATTERN               /* Pattern used to initialize the RAM Stack */
     mov bx, OFFSET _boot_stack_segment  /* Get the stack segement to use it with the ES register */
-    mov cx, OFFSET _boot_stack_size	    /* Get the size of the Stack memory */
+    mov cx, OFFSET _boot_stack_size     /* Get the size of the Stack memory */
 
     /* AX=Pattern, BX=Segment, CX=Size of stack */
     call memInitStack
@@ -86,9 +86,9 @@ stage1Main:
     mov si, OFFSET _mbr_address + MBR_PART_TABLE_OFFSET
 
 .partTabCopyLoop_stage1Main:
-    lodsw							    /* Load the first 2 byte of the Partition Table from MBR*/
-    stosw							    /* Store it in the global structure */
-    sub cx, 2						    /* Decrement the read counter by 2 bytes */
+    lodsw                               /* Load the first 2 byte of the Partition Table from MBR*/
+    stosw                               /* Store it in the global structure */
+    sub cx, 2                           /* Decrement the read counter by 2 bytes */
     jnz .partTabCopyLoop_stage1Main     /* If still bytes to copy, go back to loop */
 
     /* Determine the parition and sector information to load Stage2 bootloader */
@@ -102,37 +102,37 @@ stage1Main:
     /* Destination address to store the "boot partition sectors" which contain Stage2 bootloader */
     mov bx, OFFSET _boot_stage2_segment /* Setup the ES segement for Stage 2 */
     mov es, bx
-    mov bx, OFFSET _boot_stage2_offset	/* Setup the Offset for Stage 2 */
+    mov bx, OFFSET _boot_stage2_offset  /* Setup the Offset for Stage 2 */
 
 .stage2LoadLoop_stage1Main:
     /* AX=LBA Address, DI=Pointer to DISK_INFO structure */
-    call diskConvToCHS          		/* We get CX = Cylinder, DH = Head, DL = Sector */
+    call diskConvToCHS                  /* We get CX = Cylinder, DH = Head, DL = Sector */
 
     push ax                             /* Save AX (contains current LBA) bevor reading the sector */
-    mov ah, [BOOT_DRV]					/* Set boot drive number as parameter */
+    mov ah, [BOOT_DRV]                  /* Set boot drive number as parameter */
 
     /* CX=Cylinder, DH=Head, DL=Sector, AH=Drive Number, ES:BX=Buffer to store data */
     /* ES=0 - still set to zero as we did it during initialization */
-    call biosDiskReadSector				/* Read from disk */
+    call biosDiskReadSector             /* Read from disk */
     pop ax                              /* Restore original AX (LBA) */
 
-    dec si								/* Decrement the sector read counter */
-    inc ax								/* Increment the sector address (LBA) -> next read */
-    add bx, DEFAULT_SECTOR_SIZE 		/* Increment the pointer to the memory buffer by the sector size */
+    dec si                              /* Decrement the sector read counter */
+    inc ax                              /* Increment the sector address (LBA) -> next read */
+    add bx, DEFAULT_SECTOR_SIZE         /* Increment the pointer to the memory buffer by the sector size */
     jnc .stage2CheckNextLoad_stage1Main /* If we didn't get an overflow, loop again */
 
     /* If we got an overflow, we need to switch the segment */
 .stage2UpdateSeg_stage1Main:
-    mov bx, OFFSET _boot_stage2_offset	/* If we got an overflow, load the offset for Stage2 again */
-    push ax								/* We use AX to modify ES, therefore save the current value */
-    mov ax, es							/* Get the current segment */
-    add ax, 0x1000						/* Increment the segment address to switch to next segment 0x1000 = next 64kb */
-    mov es, ax							/* Set the new segment */
-    pop ax								/* Restore old AX value */
+    mov bx, OFFSET _boot_stage2_offset  /* If we got an overflow, load the offset for Stage2 again */
+    push ax                             /* We use AX to modify ES, therefore save the current value */
+    mov ax, es                          /* Get the current segment */
+    add ax, 0x1000                      /* Increment the segment address to switch to next segment 0x1000 = next 64kb */
+    mov es, ax                          /* Set the new segment */
+    pop ax                              /* Restore old AX value */
 
 .stage2CheckNextLoad_stage1Main:
-    test si, si							/* Check for zero of our sector read counter */
-    jnz .stage2LoadLoop_stage1Main		/* Loop till we read all sectors */
+    test si, si                         /* Check for zero of our sector read counter */
+    jnz .stage2LoadLoop_stage1Main      /* Loop till we read all sectors */
 
 .stage2LoadDone_stage1Main:
     mov ax, 0                           /* */
@@ -144,7 +144,7 @@ stage1Main:
  * Error handlers
 */
 .halt:
-    cli                     		    /* Disable interrupts, this way CPU can't get out of "halt" state */
+    cli                                 /* Disable interrupts, this way CPU can't get out of "halt" state */
     hlt
 
 
