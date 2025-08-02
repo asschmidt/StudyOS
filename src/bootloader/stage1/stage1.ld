@@ -134,7 +134,7 @@ SECTIONS
         /* Insert all .text.* input sections */
     	*(.text);
         *(.text.*);
-   	} > BOOTLOADER AT > BOOTLOADER
+   	} > BOOTLOADER
 
     /* .rodata section containing the read-only (constant) data */
 	.rodata :
