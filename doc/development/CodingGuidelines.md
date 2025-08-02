@@ -138,3 +138,40 @@ The following stack frame setup is used for the calling convention in Protected-
 | `-2(bp)`      | unspecified            | Current  |
 |               | . . .                  | Current  |
 | `0(sp)`       | variable size          | Current  |
+
+## Linker
+All software components in StudyOS use a Linker Script to define the memory sections and symbols.
+
+### Linker Symbols
+Inside the Linker Script there are two different symbols (not from technical point of view, but from programmers point of view).
+
+The first type of symbols are symbols and constants which are intented to be used only inside the Linker Script. These symbols shall be written in capital letters.
+
+```
+/*
+ * Defines the linear address and size of the Stack for Stage1 Bootloader.
+ *
+ * Remark: This is an address > than 16 Bit and must be recalculated in segement/
+ * offset pair for usage in the bootloader code. The Linker can handle the adress
+ * calculations for the stack with more than 16 Bit.
+ */
+BOOT_STACK_ADR      = 0x7FC00;
+BOOT_STACK_SIZE     = 1K;
+
+/*
+ * Define the offset for the stack segment (Offset 0x400 = 1 KiB --> Last address in Stack)
+ * and calculate the corresponding segment for the physical address of the stack
+ * based on the chosen offset
+ */
+BOOT_STACK_OFFSET   = 0x0;
+BOOT_STACK_SEGMENT  = (BOOT_STACK_ADR - BOOT_STACK_OFFSET) / 16;
+```
+
+If a symbol planned to be used in other modules (e.g. assembler and C/C++ source files), it shall be written in small letters and it should have an underscore `_` as prefix.
+
+```
+/* Define the size of the Stack used by the Stage1 Bootloader */
+_boot_stack_offset  = BOOT_STACK_OFFSET;
+_boot_stack_segment = BOOT_STACK_SEGMENT;
+_boot_stack_size    = BOOT_STACK_SIZE;
+```
