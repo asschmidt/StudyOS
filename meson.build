@@ -1,4 +1,4 @@
-project('BootTest', 'c', 'cpp', version: '0.0.1', meson_version: '1.8.3')
+project('StudyOS', 'c', 'cpp', version: '0.0.1', meson_version: '1.8.3')
 
 
 ###############################################################################
