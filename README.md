@@ -35,11 +35,19 @@ I tried to document the internals of the different software components, details 
    * [Coding Guidelines](doc/development/CodingGuidelines.md)
    * [Bootsector](doc/development/Bootsector.md)
    * [Floppy Disk Layout](doc/development/Floppy_Disk.md)
+   * [BIOS Data Area](doc/development/BDA.md)
  * Tools
+   * [Assembler](doc/tools/Assembler.md)
    * [Eclipse](doc/tools/Eclipse.md)
    * [ImHex](doc/tools/ImHex.md)
    * [Meson Build System](doc/tools/Meson.md)
    * [QEmu System Emulator](doc/tools/QEmu.md)
+ * Components
+   * [Bootdisk](doc/components/Bootdisk.md)
+   * [Stage 1 Bootloader](doc/components/Bootloader/Stage1.md)
+   * [Stage 2 Bootloader](doc/components/Bootloader/Stage2.md)
+ * Knowledge Base
+   * [Knowledge Base Collection](doc/Knowledge_Base.md)
 
 
 ## Requirements
