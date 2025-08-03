@@ -11,7 +11,7 @@
 #include "bios_defines.asm"
 
 /*
- * Read Disk information like Cylinder, Sector and Head count via BIOS INT 10h
+ * Read Disk information like Cylinder, Sector and Head count via BIOS INT 13h
  *
  * Parameter:
  *   DL: Disk number
