@@ -460,3 +460,111 @@ Directly after calling the function `memInitStack`, the debugger shows the conte
 > [!NOTE]
 > You might have noticed the strange memory expression in the memory viewer of the debugger. As the investigated memory address it is written `0x7FC0 * 16`. The reason for this is: Our debugger only knows the linear address space and can also access this address space directly in the emulator. Therefore we have to provide a linear address and this is calculated by `LinearAdr = (SegmentAdr * 16) + Offset`. In our case we chose offset to zero, therefore `LinearAdr = SegmentAdr * 16` is enough for the memory view.
 
+### Get Disk Information
+After the complete memory setup and stack initialization, the Stage 1 Bootloader reads an information structure for the disk layout in preparation to load Stage 2. The following code snippet shows the code to read the `DISK_INFO_STRUCT` via a BIOS function and copies the data into a variable in then `.bss` section.
+
+```gas
+    /* Read the Disk Information */
+    mov dl, BYTE PTR [BOOT_DRV]         /* Get the drive we booted from */
+    mov di, OFFSET DISK_INFO            /* Get a pointer to the global variable DISK_INFO */
+    mov si, OFFSET MSG_READ_FAILED      /* Pointer to error message in case of disk issues */
+
+    /* DL=Disk Number, DI=Pointer to DISK_INFO struct, SI=Pointer to Error Message */
+    call biosDiskGetInfo                /* Read disk info and populate global DISK_INFO structure */
+```
+
+The `DISK_INFO_STRUCT` contains information about the disk geometry like number of cylinders, sector count and head count. These information are necessary to perform a conversion between CHS Adressing and LBA. Basically, the function `biosGetDiskInfo` uses a function from BIOS interrupt `0x13` to get the disk information. Hereby, some bit manipulations are made because the values returned by the BIOS interrupt are packed into 16 bit values with multiple data fields in it.
+
+After the disk information are available, the Stage 1 Bootloader copies the partition table from the loaded bootsector area into  separate variables located in the `.bss` section. This step isn't really necessary, but it would provide the possibility to have control over the partition table information which can be stored anywhere and maybe accessed later from Stage 2. But form technical point of view, this step isn't needed.
+
+```gas
+    /* Get the first partition table entry to get CHS addresses for reading */
+    /* Get the size of the struct */
+    mov cx, PART_TABLE_ENTRY_SIZE
+    /* Get the address of global partition table entry 1 struct */
+    mov di, OFFSET PART_TAB_ENTRY1
+    /* Get the address of first partition table entry in MBR */
+    mov si, OFFSET _mbr_address + MBR_PART_TABLE_OFFSET
+
+.partTabCopyLoop_stage1Main:
+    lodsw                               /* Load the first 2 byte of the Partition Table from MBR*/
+    stosw                               /* Store it in the global structure */
+    sub cx, 2                           /* Decrement the read counter by 2 bytes */
+    jnz .partTabCopyLoop_stage1Main     /* If still bytes to copy, go back to loop */
+```
+This code section just contains a simple copy-loop where every cycle a word (16 bit) are copied from a source buffer to a target buffer. The source buffer is located inside the memory area of the loaded bootsector and the destination buffer is located in the `.bss` section containing variables for 4 partition table entries.
+
+### Loading of Stage 2
+Now, that we have all information about disk geometry and partition table layout, we can start loading the Stage 2 Bootloader from the dedicated Stage 2 partition.
+
+The preparation of the Stage 2 loading sets up the information about the sector (in LBA address mode) where the reading should start and the number of sectors we wan't to read. Additionally, the segment and offset addresses of the memory location, where the Stage 2 content should be loaded, is specified.
+
+
+```gas
+    /* Determine the parition and sector information to load Stage2 bootloader */
+    mov di, OFFSET DISK_INFO
+    /* Starting with first sector from partition table */
+    mov ax, [PART_TAB_ENTRY1 + PART_TABLE_ENTRY_LBA_START_OFFSET]
+
+    /* Count of sectors to read */
+    mov si, OFFSET _boot_stage2_max_sector_count
+
+    /* Destination address to store the "boot partition sectors" which contain Stage2 bootloader */
+    mov bx, OFFSET _boot_stage2_segment /* Setup the ES segement for Stage 2 */
+    mov es, bx
+    mov bx, OFFSET _boot_stage2_offset  /* Setup the Offset for Stage 2 */
+```
+
+After the preparation of the necessary information, the loading loops beginns. Hereby, the LBA addresses have to be converted into CHS addresses because the BIOS functions to read sectors from a disk only support CHS adresses. Then, after the CHS address is available, the BIOS function to read a sector is used. The target memory address to which the content will be loaded is specified via the `ES:BX` segment/offset combination.
+
+```gas
+.stage2LoadLoop_stage1Main:
+    /* AX=LBA Address, DI=Pointer to DISK_INFO structure */
+    call diskConvToCHS                  /* We get CX = Cylinder, DH = Head, DL = Sector */
+
+    push ax                             /* Save AX (contains current LBA) bevor reading the sector */
+    mov ah, [BOOT_DRV]                  /* Set boot drive number as parameter */
+
+    /* CX=Cylinder, DH=Head, DL=Sector, AH=Drive Number, ES:BX=Buffer to store data */
+    /* ES=0 - still set to zero as we did it during initialization */
+    call biosDiskReadSector             /* Read from disk */
+    pop ax                              /* Restore original AX (LBA) */
+
+    dec si                              /* Decrement the sector read counter */
+    inc ax                              /* Increment the sector address (LBA) -> next read */
+    add bx, DEFAULT_SECTOR_SIZE         /* Increment the pointer to the memory buffer by the sector size */
+    jnc .stage2CheckNextLoad_stage1Main /* If we didn't get an overflow, loop again */
+```
+One special aspect of this loading loop is, that we have to deal with the situation that we could get a segment overflow if we read more than 64 KiB. Each segment in Real-Mode can be 64 KiB in maximum size and if we read more than this, we have to update the segment/offset addresses accordingly.
+
+The next code snippet shows the code to update the segment and offset addresses if the get an overflow of the total number of bytes we read. The overflow is generated (carry bit is set) by the addition of the `DEFAULT_SECTOR_SIZE` to the offset address register `BX`.
+
+```gas
+    /* If we got an overflow, we need to switch the segment */
+.stage2UpdateSeg_stage1Main:
+    mov bx, OFFSET _boot_stage2_offset  /* If we got an overflow, load the offset for Stage2 again */
+    push ax                             /* We use AX to modify ES, therefore save the current value */
+    mov ax, es                          /* Get the current segment */
+    add ax, 0x1000                      /* Increment the segment address to switch to next segment 0x1000 = next 64kb */
+    mov es, ax                          /* Set the new segment */
+    pop ax                              /* Restore old AX value */
+
+.stage2CheckNextLoad_stage1Main:
+    test si, si                         /* Check for zero of our sector read counter */
+    jnz .stage2LoadLoop_stage1Main      /* Loop till we read all sectors */
+
+.stage2LoadDone_stage1Main:
+
+```
+
+### Start Stage 2
+Finally, after reading all sectors from the Stage 2 partition into memory, the Stage 1 Bootloader jumps to the loaded memory address to continue the execution with Stage 2
+
+```gas
+.stage2LoadDone_stage1Main:
+    mov ax, 0                           /* */
+    mov es, ax                          /* Reset the ES segement to 0 */
+    jmp _boot_stage2_segment:0          /* Use stage 2 segement as new code segement */
+```
+
+Hereby, a far-jump with the corrent Stage 2 code segment is used. It is also important to note, that the Extra-Segment is reset to zero in case we had to update it because of the segment overflow during the load operation.
