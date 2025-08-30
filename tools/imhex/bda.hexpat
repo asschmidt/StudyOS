@@ -15,6 +15,7 @@
 import hex.core;
 import std.io;
 import type.guid;
+import type.base;
 
 //
 // Enumeration to indicate Installed/Not Installed Flags
@@ -37,7 +38,7 @@ enum KEY_PRESS_FLAG : u8
     PRESSED             = 0x01          // Key is pressed
 };
 
-// 
+//
 // Enumeration for possible Video Modes in BDA
 enum VIDEO_MODE : u8
 {
@@ -118,21 +119,21 @@ bitfield KEYBOARD_SHIFT_FLAGS2
 //
 struct BDA
 {
-    u16 baseAdrCOM1;                    // I/O Base Address for COM Port 1
-    u16 baseAdrCOM2;                    // I/O Base Address for COM Port 2
-    u16 baseAdrCOM3;                    // I/O Base Address for COM Port 3
-    u16 baseAdrCOM4;                    // I/O Base Address for COM Port 4
+    type::Hex<u16> baseAdrCOM1;         // I/O Base Address for COM Port 1
+    type::Hex<u16> baseAdrCOM2;         // I/O Base Address for COM Port 2
+    type::Hex<u16> baseAdrCOM3;         // I/O Base Address for COM Port 3
+    type::Hex<u16> baseAdrCOM4;         // I/O Base Address for COM Port 4
 
-    u16 baseAdrLPT1;                    // I/O Base Address for LPT Port 1
-    u16 baseAdrLPT2;                    // I/O Base Address for LPT Port 2
-    u16 baseAdrLPT3;                    // I/O Base Address for LPT Port 3
-    u16 baseAdrLPT4;                    // I/O Base Address for LPT Port 4
+    type::Hex<u16> baseAdrLPT1;         // I/O Base Address for LPT Port 1
+    type::Hex<u16> baseAdrLPT2;         // I/O Base Address for LPT Port 2
+    type::Hex<u16> baseAdrLPT3;         // I/O Base Address for LPT Port 3
+    type::Hex<u16> baseAdrLPT4;         // I/O Base Address for LPT Port 4
 
     EQUIPMENT_WORD equipmentWord;       // Bit-coded Equipment Word with detected HW
 
-    u8 interruptFlag;                   // Interrupt flag - Manufacturing test  
+    u8 interruptFlag;                   // Interrupt flag - Manufacturing test
     u16 memSize;                        // Memory Size in KiB
-    u16 errorCodeATPlus;                // Error codes for AT+; Adapter memory size for PC and XT 
+    u16 errorCodeATPlus;                // Error codes for AT+; Adapter memory size for PC and XT
 
     KEYBOARD_SHIFT_FLAGS1 shiftFlags1;  // Keyboard flags about Lock Keys and Alt/Ctrl/Shift pressed
     KEYBOARD_SHIFT_FLAGS2 shiftFlags2;  // Keyboard flags about special keys pressed
@@ -155,12 +156,12 @@ struct BDA
     u8 floppyHeadNo;
     u8 floppySecNo;
     u8 floppyBytesWritten;
-    
+
     u8 activeVideoMode;
     u16 numTextColsPerRow;
     u16 videoPageSize;
     u16 offsetActiveVideoPage;
-    
+
     u16 curserPosPage0;
     u16 curserPosPage1;
     u16 curserPosPage2;
@@ -170,18 +171,18 @@ struct BDA
     u16 curserPosPage6;
     u16 curserPosPage7;
     u16 cursorShape;
-    
+
     u8 activeVideoPage;
     u16 ioAdrVideoAdapter;
     u8 videoInternalModeReg;
     u8 colorPalette;
     u16 adapterROMOffset;
     u16 adapterROMSegment;
-    
+
     u8 lastInterrupt;
     u32 counterInt1Ah;
     u8 timer24HourFlag;
-    
+
     u8 keyboardCtrlBreakFlag;
     u16 softResetFlag;
 
@@ -189,60 +190,60 @@ struct BDA
     u8 numHDD;
     u8 hddControlByte;
     u8 ioAdrOffsetHDD;
-    
+
     u8 timeoutLPT1;
     u8 timeoutLPT2;
     u8 timeoutLPT3;
     u8 timeoutLPT4;
-    
+
     u8 timeoutCOM1;
     u8 timeoutCOM2;
     u8 timeoutCOM3;
     u8 timeoutCOM4;
-    
+
     u16 startAdrKeyboardBuf;
     u16 endAdrKeyboardBuf;
-    
+
     u8 numVideoRows;
-    
+
     u16 numScanlinePerChar;
     u8 videoAdapterOptions;
     u8 videoAdapterSwitches;
-    
+
     u8 vgaFlags1;
     u8 vgaFlags2;
-    
+
     u8 floppyDiskConfigData;
-    
+
     u8 hddControllerStatus;
     u8 hddDriveError;
     u8 hddTaskCompleteFlag;
-    
+
     u8 floppyDriveInfo;
-    
+
     u8 mediaStateDisk0;
     u8 mediaStateDisk1;
-    
+
     u8 opStateDisk0;
     u8 opStateDisk1;
-    
+
     u8 currentCylinderDisk0;
     u8 currentCylinderDisk1;
-    
+
     u8 keyboardFlags3;
     u8 keyboardFlags4;
-    
-    u32 segmentOffsetUserWaitPointer;
-    
+
+    type::Hex<u32> segmentOffsetUserWaitPointer;
+
     u32 userWaitCount;
     u8 userWaitFlag;
-    
+
     u8 lanBytes[7];
-    
-    u32 segmentOffsetVideoControlBlock;
-    
+
+    type::Hex<u32> segmentOffsetVideoControlBlock;
+
     u8 res[68];
-    
+
     u8 intraAppArea[16];
 };
 
