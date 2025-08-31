@@ -78,72 +78,92 @@ pmPICRemap:
     mov esi, [ebp + 12]
 
     /* Start Initialization in Cascade Mode */
+    /* pmPortOutByte(PIC1_CMD_REG, ICW1_INIT | ICW1_ICW4) */
     push ICW1_INIT | ICW1_ICW4              /* ICW1_INIT | ICW1_ICW4 */
     push PIC1_CMD_REG                       /* PIC1_CMD_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
+    /* pmPortOutByte(PIC2_CMD_REG, ICW1_INIT | ICW1_ICW4) */
     push ICW1_INIT | ICW1_ICW4              /* ICW1_INIT | ICW1_ICW4 */
     push PIC2_CMD_REG                       /* PIC2_CMD_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Set Offset for Master PIC (PIC1) */
+    /* pmPortOutByte(PIC1_DATA_REG, offset1) */
     push edi
     push PIC1_DATA_REG                      /* PIC1_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Set Offset for Slave PIC (PIC2) */
+    /* pmPortOutByte(PIC2_DATA_REG, offset2) */
     push esi
     push PIC2_DATA_REG                      /* PIC2_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Tell Master PIC about the cascade IRQ 2 */
+    /* pmPortOutByte(PIC1_DATA_REG, 1 << CASCADE_IRQ) */
     push 1 << CASCADE_IRQ                   /* 1 << CASCADE_IRQ */
     push PIC1_DATA_REG                      /* PIC1_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Tell Slave PIC about cascade identity 0000 0010 */
+    /* pmPortOutByte(PIC2_DATA_REG, CASCADE_IRQ) */
     push CASCADE_IRQ                        /* CASCADE_IRQ */
     push PIC2_DATA_REG                      /* PIC2_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Tell Master PIC to use 8086 Mode */
+    /* pmPortOutByte(PIC1_DATA_REG, ICW4_8086) */
     push ICW4_8086                          /* ICW4_8086 */
     push PIC1_DATA_REG                      /* PIC1_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Tell Slave PIC to use 8086 Mode */
+    /* pmPortOutByte(PIC2_DATA_REG, ICW4_8086) */
     push ICW4_8086                          /* ICW4_8086 */
     push PIC2_DATA_REG                      /* PIC2_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Unmask Master PIC */
+    /* pmPortOutByte(PIC1_DATA_REG, 0x00) */
     push 0x00
     push PIC1_DATA_REG                      /* PIC1_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     /* Unmask Slave PIC */
+    /* pmPortOutByte(PIC2_DATA_REG, 0x00) */
     push 0x00
     push PIC2_DATA_REG                      /* PIC2_DATA_REG */
     call pmPortOutByte
     add esp, 8
+    /* pmPortWait(); */
     call pmPortWait
 
     pop esi
