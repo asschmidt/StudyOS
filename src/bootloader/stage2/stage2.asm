@@ -30,28 +30,37 @@ stage2Start:
     mov es, ax              		    /* Initialize the Extra Segement to 0 */
 
 	mov ax, OFFSET _boot_stage2_segment /* Get the segment for the bootloader stage 2 */
-	mov ds, ax              		    /* Initialize the DataSegement to 0 */
+	mov ds, ax              		    /* Initialize the DataSegement to _boot_stage2_segment */
 
     mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
     mov ss, ax              		    /* Initialize the Stack Segement to _boot_stack_segment */
+
+    /* At this point we have the following segment configuration
+     *
+     * CS: 0x7E0
+     * ES: 0x00
+     * DS: 0x7E0 (_boot_stage2_segment)
+     * SS: 0x7800 (_boot_stack_segment)
+     */
 
 	/* Initialize the Stack Pointer */
     mov sp, OFFSET _boot_stack_start_offset
     mov bp, sp              		    /* Initialize the Base Pointer used in Stack Frames */
     push bp                 		    /* We save BP with the original SP value on stack */
 
+    /* biosClearScreen(); */
     call biosClearScreen                /* Clear the screeen */
 
     /* biosSetCursor(0, 0); */
     push 0                              /* Column idx for ioSetCursor */
     push 0                              /* Row idx for ioSetCursor */
     call biosSetCursor
-
-    /* Clean up caller-stack */
     add sp, 4
 
-    mov si, OFFSET MSG_LOADING
+    /* biosPutString(&MSG_LOADINGG); */
+    push OFFSET MSG_LOADING
     call biosPutString
+    add sp, 2
 
     call pmSwitch
 

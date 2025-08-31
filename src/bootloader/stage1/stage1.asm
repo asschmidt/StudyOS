@@ -58,15 +58,14 @@ stage1Main:
 
     /* Initialize Stack Area for Stack-Monitoring*/
     mov ax, STACK_PATTERN               /* Pattern used to initialize the RAM Stack */
-    mov bx, OFFSET _boot_stack_segment  /* Get the stack segement to use it with the ES register */
+    mov bx, OFFSET _boot_stack_segment  /* Get the stack segement */
     mov cx, OFFSET _boot_stack_size     /* Get the size of the Stack memory */
 
     /* AX=Pattern, BX=Segment, CX=Size of stack */
     call memInitStack
 
-    mov si, OFFSET MSG_REAL_MODE
-
-    /* SI=Pointer to String */
+    /* biosPutString(&MSG_REAL_MODE); */
+    push OFFSET MSG_REAL_MODE
     call biosPutString                  /* Print a Loading... message to screen */
 
     /* Read the Disk Information */
@@ -86,8 +85,8 @@ stage1Main:
     mov si, OFFSET _mbr_address + MBR_PART_TABLE_OFFSET
 
 .partTabCopyLoop_stage1Main:
-    lodsw                               /* Load the first 2 byte of the Partition Table from MBR*/
-    stosw                               /* Store it in the global structure */
+    lodsw                               /* Load the first 2 byte of the Partition Table from MBR (Load word at address DS:SI into AX.) */
+    stosw                               /* Store it in the global structure (Store AX at address ES:DI.) */
     sub cx, 2                           /* Decrement the read counter by 2 bytes */
     jnz .partTabCopyLoop_stage1Main     /* If still bytes to copy, go back to loop */
 
@@ -109,7 +108,7 @@ stage1Main:
     call diskConvToCHS                  /* We get CX = Cylinder, DH = Head, DL = Sector */
 
     push ax                             /* Save AX (contains current LBA) bevor reading the sector */
-    mov ah, [BOOT_DRV]                  /* Set boot drive number as parameter */
+    mov ah, BYTE PTR [BOOT_DRV]         /* Set boot drive number as parameter */
 
     /* CX=Cylinder, DH=Head, DL=Sector, AH=Drive Number, ES:BX=Buffer to store data */
     /* ES=0 - still set to zero as we did it during initialization */

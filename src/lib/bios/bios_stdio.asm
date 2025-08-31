@@ -15,7 +15,7 @@
 /*
  * Clears the screen by scrolling all lines via BIOS INT 10h
  *
- * void ioClearScreen();
+ * void biosClearScreen();
  *
  * Parameters:
  *    -
@@ -35,12 +35,13 @@ biosClearScreen:
 
     mov ah, 0x06                            /* BIOS functio to scroll */
     mov al, 0x00                            /* Scroll complete screen */
-     /* Set background color to black and foregound color to light gray */
+
+     /* Set background color to black and foregound color to light gray (COLOR_BLACK << 8) | COLOR_LIGHTGRAY*/
     mov bh, (COLOR_BLACK << 8) | COLOR_LIGHTGRAY
-    mov ch, SCREEN_ROW_TOP_LEFT             /* Row of top left corner of the scroll window */
-    mov cl, SCREEN_COL_TOP_LEFT             /* Column of top left corner of the scroll window */
-    mov dh, SCREEN_ROW_LOWER_RIGHT          /* Row of the lower right corner of the scroll window */
-    mov dl, SCREEN_COL_LOWER_RIGHT          /* Column of the lower right corner of the scroll window */
+    mov ch, SCREEN_ROW_TOP_LEFT             /* Row of top left corner of the scroll window (SCREEN_ROW_TOP_LEFT) */
+    mov cl, SCREEN_COL_TOP_LEFT             /* Column of top left corner of the scroll window (SCREEN_COL_TOP_LEFT) */
+    mov dh, SCREEN_ROW_LOWER_RIGHT          /* Row of the lower right corner of the scroll window (SCREEN_ROW_LOWER_RIGHT) */
+    mov dl, SCREEN_COL_LOWER_RIGHT          /* Column of the lower right corner of the scroll window (SCREEN_COL_LOWER_RIGHT) */
 
     int 0x10                                /* Call the BIOS function */
 
@@ -97,7 +98,7 @@ biosSetCursor:
  * void biosPutChar(char a);
  *
  * Parameters:
- *    AL: Char to output
+ *    BP + 4: char to output
  *
  * Return:
  *    -
@@ -107,14 +108,22 @@ biosSetCursor:
 .section .text.biosPutChar,"ax",@progbits
 .global biosPutChar
 biosPutChar:
+    push bp                                 /* Setup stack frame */
+    mov bp, sp
+
     push ax
     push bx
+
+    mov al, BYTE PTR [bp + 4]               /* Get character parameter from stack */
+
     mov ah, byte ptr 0x0E
     mov bh, byte ptr 0x00
     mov bl, byte ptr 0x07
     int 0x10
     pop bx
     pop ax
+
+    leave                                   /* Restore frame pointer */
     ret
 
 /*
@@ -123,7 +132,7 @@ biosPutChar:
  * void biosPutString(char* string);
  *
  * Parameters:
- *    SI: Pointer to Null-Terminated string
+ *    BP + 4: Pointer to Null-Terminated string
  *
  * Returns:
  *    -
@@ -133,9 +142,14 @@ biosPutChar:
 .section .text.biosPutString,"ax",@progbits
 .global biosPutString
 biosPutString:
+    push bp                                 /* Setup stack frame */
+    mov bp, sp
+
     push si
     push ax
     push bx
+
+    mov si, WORD PTR [bp + 4]               /* Get address of string into SI */
 
 .loop_biosPutString:
     lodsb
@@ -152,5 +166,7 @@ biosPutString:
     pop bx
     pop ax
     pop si
+
+    leave                                   /* Restore frame pointer */
     ret
 
