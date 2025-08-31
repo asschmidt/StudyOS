@@ -110,6 +110,9 @@ The following registers and their corresponding usage are defined in the calling
 | `esp` / `sp`   | Stack pointer                                |
 
 #### Stack Frame
+
+Arguments are pushed onto the stack in reverse order. That is, the rightmost argument in C call syntax is pushed first on the stack.
+
 The following stack frame setup is used for the calling convention in Protected-Mode (32 Bit Mode). For StudyOS, the Stack Frame Pointer is always used.
 
 | Position      | Contents               | Frame    |
