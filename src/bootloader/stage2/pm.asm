@@ -14,6 +14,8 @@
 #include "bios_defines.asm"
 /* Include PIC defines */
 #include "pm_pic_defines.asm"
+/* Include IDT Defines */
+#include "pm_idt_defines.asm"
 
 /*
  * External Symbols
@@ -60,7 +62,7 @@ pmSwitch:
     or eax, 0x01                            /* Set Bit 0 to switch to PM */
     mov cr0, eax                            /* Set new CR0 value */
 
-    jmp CODE_SEG:pmInit                     /* Call into PM function (32 Bit) */
+    jmp CODE_SEG:pmInit                     /* Call into PM function (32 Bit) (CODE_SEG) */
 
 
 .code32
@@ -132,7 +134,7 @@ pmInit:
 
     /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, 0x8F, CODE_SEG); */
     push CODE_SEG                           /* CODE_SEG */
-    push 0x8E
+    push IDT_TYPE_ATTRIB_INT32              /* IDT_TYPE_ATTRIB_INT32 */
     push OFFSET pmDefaultISR
     push ecx
     push OFFSET idtTemp
