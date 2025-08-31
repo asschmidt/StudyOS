@@ -9,9 +9,11 @@
 
 .intel_syntax noprefix
 
+/* Include Commond and BIOS defines */
 #include "common_defines.asm"
-/* Include BIOS defines */
 #include "bios_defines.asm"
+/* Include PIC defines */
+#include "pm_pic_defines.asm"
 
 /*
  * External Symbols
@@ -22,8 +24,10 @@
 .extern gdtDescriptorTemp                   /* Symbol for the descriptor of the temporary GDT */
 
 /* Constants */
-.set CODE_SEG, 0x08
-.set DATA_SEG, 0x10
+/* Code Segment Selector */
+#define CODE_SEG    0x08
+/* Data Segment Selector */
+#define DATA_SEG    0x10
 
 .code16
 .section .text
@@ -38,16 +42,12 @@ pmSwitch:
     /* Disable all interrupts */
 	cli
 
-    /* Push parameter onto stack */
+    /* pmPrepareGDT(&gdtStartTemp, &gdtEndTemp, &_boot_stage2_segment, &gdtDescriptorTemp); */
     push OFFSET gdtDescriptorTemp
     push OFFSET _boot_stage2_segment
     push OFFSET gdtEndTemp
     push OFFSET gdtStartTemp
-
-    /* pmPrepareGDT(gdtStartTemp, gdtEndTemp, _boot_stage2_segment, &gdtDescriptorTemp); */
     call pmPrepareGDT
-
-    /* Clean up the parameter stack */
     add sp, 8
 
     /* The GDT must be loaded with the ES segment due to the fact that CS and DS are
@@ -69,7 +69,7 @@ pmSwitch:
 .global pmInit
 pmInit:
 	/* Initialize all segment selectors with the data segement from temporary GDT */
-    mov ax, DATA_SEG
+    mov ax, DATA_SEG                        /* DATA_SEG */
     mov ds, ax
     mov ss, ax
     mov es, ax
@@ -79,41 +79,42 @@ pmInit:
     /* Initialize the stack pointer to the original stack memory but using the GDT segments */
     /* In Real-Mode, the stack segment is located at 0x7800:0000. To use the same physical memory
      * in Protected-Mode, we need to consider the Data-Segement Offset in GDT (which is 0x7E00)
-     * To calculate the stack pointer for the use with the GDT data segment but using same memory
+     * To calculate the stack pointer for the use with the GDT data segment, but using same memory
      * as we had in Real-Mode, we must peform the following calculation
      * StackPointer = ((_boot_stack_segment * 16) + _boot_stack_start_offset) - _boot_stage2_segment
      */
     xor eax, eax
     mov eax, OFFSET _boot_stack_segment
+    /* (_boot_stack_segment * 16) */
     shl eax, 4
 
     mov ebx, OFFSET _boot_stack_start_offset
+    /* Add _boot_stack_start_offset to prepared segment address */
     add eax, ebx
 
-    /* Subtract the Data Segment offset used in temporary GDT */
     mov ebx, OFFSET _boot_stage2_segment
+    /* _boot_stage2_segment * 16 */
     shl ebx, 4
+    /* Substract _boot_stage2_segment from linear address of boot stack */
     sub eax, ebx
 
+    /* Set the Base-Pointer and Stack-Pointer to calculated address */
     mov ebp, eax
     mov esp, ebp
 
-    /* Offset parameter for Video Memory based on temp. GDT */
+    /* pmPutString(&PM_MESSAGE, videoMemoryOffset); */
     /* EBX still holds the calculated segment address */
-    push ebx
+    push ebx                                /* Offset parameter for Video Memory based on temp. GDT. */
     push OFFSET PM_MESSAGE                  /* Pointer to string */
-
     call pmPutString
     add esp, 8
 
+    /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_boot_stage2_segment); */
     push OFFSET _boot_stage2_segment
-    push IDT_ENTRY_COUNT
+    push IDT_ENTRY_COUNT                    /* IDT_ENTRY_COUNT */
     push OFFSET idtTemp
     push OFFSET idtDescriptorTemp
-
-    /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, _boot_stage2_segment); */
     call pmPrepareIDT
-    /* Clean-up stack */
     add esp, 16
 
     /* Load the IDTR with the prepared descriptor */
@@ -124,38 +125,40 @@ pmInit:
 	/* Enable all interrupts */
     sti
 
+    /* Initialize the IDT Entries for 25...255 */
+    /* for (i=255; i<25; i--) */
     mov ecx, 255
-.initIDTLoop:
-    push CODE_SEG
+.initIDTLoop_pmInit:
+
+    /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, 0x8F, CODE_SEG); */
+    push CODE_SEG                           /* CODE_SEG */
     push 0x8E
     push OFFSET pmDefaultISR
     push ecx
     push OFFSET idtTemp
-
-    /* pmSetupIDTEntry(&idtTemp, 0x21, &pmDefaultISR, 0x8F, CODE_SEG); */
     call pmSetupIDTEntry
-    /* Clean-up stack */
     add esp, 20
 
     dec ecx
-    cmp ecx, 0x19
-    jne .initIDTLoop
+    cmp ecx, 25
+    jne .initIDTLoop_pmInit
 
     /* Remap the PIC with the correct offset */
-    push 0x28
-    push 0x20
     /* pmPICRemap(0x20, 0x28); */
+    push PIC2_OFFSET                        /* Offset for PIC2 --> IRQ 8..15 -> IDT: 0x28...0x2F (PIC2_OFFSET) */
+    push PIC1_OFFSET                        /* Offset for PIC1 --> IRQ 0..7  -> IDT: 0x20...0x27 (PIC1_OFFSET) */
     call pmPICRemap
     add esp, 8
 
     /* Mask out Timer Interrupt */
+    /* pmPICSetMask(0x00); */
     push 0x00
     call pmPICSetMask
     add esp, 4
 
-.nopLoop:
+.nopLoop_pmInit:
     nop
-    jmp .nopLoop
+    jmp .nopLoop_pmInit
 
 .section .rodata
 PM_MESSAGE: .asciz "Switched to Protected Mode"
