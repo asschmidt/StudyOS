@@ -71,6 +71,9 @@ The following code snippets show an example for an assembler include file and th
 #endif
 ```
 
+>[!IMPORTANT]
+> Do not use comments after a `#define` because due to the commandline options of the preprocessor, comments will be preserved and therefore will be part of the macro expansion
+
 An the assembler source file which uses the include file might look like this
 
 ```c
