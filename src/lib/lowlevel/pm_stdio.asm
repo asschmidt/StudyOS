@@ -39,7 +39,7 @@ pmPutString:
     mov eax, [ebp + 8]                          /* Get the string pointer */
     mov ecx, [ebp + 12]							/* Get the offset */
 
-    mov ebx, VIDEO_MEMORY                       /* Address of Video Memory we will write to */
+    mov ebx, VIDEO_MEMORY                       /* Address of Video Memory we will write to (VIDEO_MEMORY) */
     sub ebx, ecx								/* Substract the offset from video memory */
 
     mov ch, COLOR_BLACK | COLOR_LIGHTGRAY       /* Set the color (background=BLACK, foreground=LIGHT_GRAY) */
