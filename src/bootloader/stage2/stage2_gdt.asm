@@ -25,7 +25,7 @@ gdtNullTemp:
     .word 0x0000
 
 /*
- * Code Segment Descriptor
+ * Code Segment Descriptor for Bootloader Stage 2
  *
  * Base = 0x00007E00
  * Limit = 0xFFFFF
@@ -43,7 +43,7 @@ gdtCodeTemp:
     .word 0x00cf
 
 /*
- * Data Segment Descriptor
+ * Data Segment Descriptor for Bootloader Stage 2
  *
  * Base = 0x00007E00
  * Limit = 0xFFFFF
@@ -65,7 +65,8 @@ gdtEndTemp:
 
 
 /*
- * GDT Descriptor as global variable in BSS segement.
+ * GDT Descriptor for Bootloader Stage 2 as global variable in BSS segement.
+ *
  * The size and the linear address of the GDT are calculated at runtime during
  * initialization of Protected Mode
  */
