@@ -127,9 +127,9 @@ pmInit:
 	/* Enable all interrupts */
     sti
 
-    /* Initialize the IDT Entries for 25...255 */
-    /* for (i=255; i<25; i--) */
-    mov ecx, 255
+    /* Initialize the IDT Entries for 0x32...0xFF */
+    /* for (i=0xFF; i>0x31; i--) */
+    mov ecx, 0xFF
 .initIDTLoop_pmInit:
 
     /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, 0x8F, CODE_SEG); */
@@ -142,11 +142,11 @@ pmInit:
     add esp, 20
 
     dec ecx
-    cmp ecx, 25
+    cmp ecx, 0x31
     jne .initIDTLoop_pmInit
 
     /* Remap the PIC with the correct offset */
-    /* pmPICRemap(0x20, 0x28); */
+    /* pmPICRemap(PIC1_OFFSET, PIC2_OFFSET); */
     push PIC2_OFFSET                        /* Offset for PIC2 --> IRQ 8..15 -> IDT: 0x28...0x2F (PIC2_OFFSET) */
     push PIC1_OFFSET                        /* Offset for PIC1 --> IRQ 0..7  -> IDT: 0x20...0x27 (PIC1_OFFSET) */
     call pmPICRemap
