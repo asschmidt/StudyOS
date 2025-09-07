@@ -34,12 +34,14 @@ pmPICSendEOI:
     jl .handlePIC1_pmPICSendEOI
 
 .handlePIC2_pmPICSendEOI:
+    /* pmPortOutByte(PIC2_CMD_REG, PIC_EOI); */
     push PIC_EOI                /* PIC_EOI */
     push PIC2_CMD_REG           /* PIC2_CMD_REG */
     call pmPortOutByte
     add esp, 8
 
 .handlePIC1_pmPICSendEOI:
+    /* pmPortOutByte(PIC1_CMD_REG, PIC_EOI); */
     push PIC_EOI                /* PIC_EOI */
     push PIC1_CMD_REG           /* PIC1_CMD_REG */
     call pmPortOutByte
@@ -198,12 +200,14 @@ pmPICReadIRQReg:
     mov edi, [ebp + 8]
 
     /* Send OCW3 value to PIC1 */
+    /* pmPortOutByte(PIC1_CMD_REG, ocw3) */
     push edi
     push PIC1_CMD_REG                       /* PIC1_CMD_REG */
     call pmPortOutByte
     add esp, 8
 
     /* Send OCW3 value to PIC2 */
+    /* pmPortOutByte(PIC2_CMD_REG, ocw3) */
     push edi
     push PIC2_CMD_REG                       /* PIC2_CMD_REG */
     call pmPortOutByte
@@ -213,6 +217,7 @@ pmPICReadIRQReg:
     xor eax, eax
 
     /* Read command register from PIC1 containing the requested register value */
+    /* eax = pmPortInByte(PIC1_CMD_REG); */
     push PIC1_CMD_REG                       /* PIC1_CMD_REG */
     call pmPortInByte
     add esp, 4
@@ -224,6 +229,7 @@ pmPICReadIRQReg:
     xor eax, eax
 
     /* Read command register from PIC2containing the requested register value */
+    /* eax = pmPortInByte(PIC2_CMD_REG); */
     push PIC2_CMD_REG                       /* PIC2_CMD_REG */
     call pmPortInByte
     add esp, 4
@@ -258,6 +264,7 @@ pmPICReadIRR:
     push ebp
     mov ebp, esp
 
+    /* eax = pmPICReadIRQReg(PIC_READ_IRR); */
     push PIC_READ_IRR                       /* PIC_READ_IRR */
     call pmPICReadIRQReg
     add esp, 4
@@ -285,6 +292,7 @@ pmPICReadISR:
     push ebp
     mov ebp, esp
 
+    /* eax = pmPICReadIRQReg(PIC_READ_ISR); */
     push PIC_READ_ISR                       /* PIC_READ_ISR */
     call pmPICReadIRQReg
     add esp, 4
@@ -332,6 +340,7 @@ pmPICSetMask:
 .maskWrite_pmPICSetMask:
 
     /* Read the current Mask Register Value */
+    /* eax = pmPortInByte(maskValue); */
     push esi
     call pmPortInByte
     add esp, 4
@@ -343,9 +352,9 @@ pmPICSetMask:
     or eax, edi
 
     /* Write Mask value to PIC */
+    /* pmPortOutByte(picPort, maskValue); */
     push eax
     push esi
-    /* pmPortOutByte(picPort, maskValue); */
     call pmPortOutByte
     add esp, 8
 
@@ -377,11 +386,13 @@ pmPICDisable:
     push ebp
     mov ebp, esp
 
+    /* pmPortOutByte(PIC1_DATA_REG, 0xFF); */
     push 0xFF
     push PIC1_DATA_REG                      /* PIC1_DATA_REG */
     call pmPortOutByte
     add esp, 8
 
+    /* pmPortOutByte(PIC2_DATA_REG, 0xFF); */
     push 0xFF
     push PIC2_DATA_REG                      /* PIC2_DATA_REG */
     call pmPortOutByte
