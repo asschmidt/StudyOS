@@ -78,7 +78,7 @@ For the Stage 1 bootloader this is pretty simple: The BIOS loads the complete bo
 #### Stage 1 RAM
 The bootloader needs also sometimes variables to store information and data for further processing. This is realized by providing a `.bss` section where the assembler can put variables in. This memory section is not initialized. But due to the fact that it is not initialized, we can use much more than we have in the `.data` section because we can place the `.bss` section in any unsued memory area of the PC.
 
-For the Stage 1 bootloader I put the `.bss` memory section in a unused memory area between the BIOS Data Area and the bootloader code itself. The reserved area occupies 28 KiB. This is way too much for the Stage 1 bootloader but we will also re-use this area for Stage 2.
+For the Stage 1 bootloader I put the `.bss` memory section in a unused memory area between the BIOS Data Area and the bootloader code itself. The reserved area occupies 4 KiB.
 
 #### Stage 1 Stack
 This memory area is really super special and completely unusual for a bootloader. In most simple bootloaders, only the Stack-Pointer of the processor is set to a fixed address and starting on this address, the processor manages the Stack-Pointer during `push` and `pop` instructions.
@@ -114,7 +114,7 @@ BOOTLOADER_STAGE2_LENGHT  = 64K;
  * .data section must reside in the bootloader binary
  */
 BOOT_RAM_ADR        = 0x0500;
-BOOT_RAM_SIZE       = 28K;
+BOOT_RAM_SIZE       = 4K;
 
 /*
  * Defines the address (offset and segment) and size of the Stack for Stage1

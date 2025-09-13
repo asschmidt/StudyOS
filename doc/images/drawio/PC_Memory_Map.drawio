@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.7.2 Safari/537.36" version="27.0.9" pages="3">
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.251 Electron/37.5.0 Safari/537.36" version="28.1.2" pages="3">
   <diagram name="PC Memory Map" id="t842GiUgyJMMFXfoEtqL">
     <mxGraphModel dx="2372" dy="1497" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -107,7 +107,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Stage 1 Memory Map" id="S5w14K8hSI9FqsHou6rF">
-    <mxGraphModel dx="791" dy="499" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="949" dy="599" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="OJ2NasaMZemPAExYC9AS-0" />
         <mxCell id="OJ2NasaMZemPAExYC9AS-1" parent="OJ2NasaMZemPAExYC9AS-0" />
@@ -211,7 +211,7 @@
           <mxGeometry x="610" y="255" width="60" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Mr-HDrRslatxrcW6GIcm-0" value="Stage 1 Bootloader RAM (.bss)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=light-dark(#432D57, #ffffff);fontSize=10;fontStyle=1" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
-          <mxGeometry x="160" y="410" width="360" height="30" as="geometry" />
+          <mxGeometry x="160" y="420" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Mr-HDrRslatxrcW6GIcm-1" value="Stage 1 Bootloader Stack (.stack)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=light-dark(#432D57, #ffffff);fontSize=10;fontStyle=1" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
           <mxGeometry x="160" y="280" width="360" height="20" as="geometry" />
@@ -219,8 +219,8 @@
         <mxCell id="Mr-HDrRslatxrcW6GIcm-4" value="512 Bytes" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Courier New;fontSize=10;" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
           <mxGeometry x="440" y="380" width="60" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="Mr-HDrRslatxrcW6GIcm-5" value="28 KiB" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Courier New;fontSize=10;" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
-          <mxGeometry x="440" y="415" width="60" height="20" as="geometry" />
+        <mxCell id="Mr-HDrRslatxrcW6GIcm-5" value="4 KiB" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Courier New;fontSize=10;" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
+          <mxGeometry x="440" y="420" width="60" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Mr-HDrRslatxrcW6GIcm-6" value="1 KiB" style="text;strokeColor=none;align=left;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Courier New;fontSize=10;" parent="OJ2NasaMZemPAExYC9AS-1" vertex="1">
           <mxGeometry x="440" y="280" width="60" height="20" as="geometry" />

@@ -7,13 +7,12 @@
  * Memory Map during startup
  * -------------------------------------------------------
  * Start     End        Size        Usage
- * 0x00500   0x074FF    28 KiB      .bss for Bootloader Stage 1 + 2
+ * 0x00500   0x01500    4 KiB       .bss for Bootloader Stage 1
  * 0x07500   0x07BFF    1792 Bytes  Reserved Memory
  * 0x07C00 	 0x07DFF 	512 bytes 	OS BootSector Stage 1
  * 0x07E00   0x17DFF    64 KiB      OS Bootloader Stage 2
- * 0x17E00   0x77FFF    384,5 KiB   Reserved Memory
- * 0x78000   0x7FBFF    31 KiB      Stack Memory Stage 2
- * 0x7FC00   0x7FFFF    1 KiB       Stack Memory Stage 1 + 2
+ * 0x17E00   0x7FBFF    415,5 KiB   Reserved Memory
+ * 0x7FC00   0x7FFFF    1 KiB       Stack Memory Stage 1
  *
  * For the bootsector code, only 440 Byte are available
  * 512 Byte - 2 Marker Bytes - 64 Byte Partition Table - 6 Byte Reserved
@@ -70,7 +69,7 @@ BOOTLOADER_STAGE2_LENGHT  = 64K;
  * .data section must reside in the bootloader binary
  */
 BOOT_RAM_ADR        = 0x0500;
-BOOT_RAM_SIZE       = 28K;
+BOOT_RAM_SIZE       = 4K;
 
 /*
  * Defines the linear address and size of the Stack for Stage1 Bootloader.
