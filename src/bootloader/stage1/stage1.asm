@@ -20,14 +20,15 @@
 /*
  * External Symbols from Linker File
  */
-.extern _mbr_address                    /* Memory adddress of MBR loaded into RAM by the BIOS */
-.extern _boot_stage2_offset             /* Offset Address of the Stage 2 Bootloader Code */
-.extern _boot_stage2_segment            /* Segement Address of the Stage 2 Bootloader Code + Data */
-.extern _boot_stage2_length             /* Length of the Stage 2 Bootloader Code Segment */
+.extern _mbr_address                      /* Memory adddress of MBR loaded into RAM by the BIOS */
 
-.extern _boot_stack_segment             /* Segment Address for the Bootloader Stage 2 Stack Memory */
-.extern _boot_stack_start_offset        /* Offset Address for the Bootloader Stage 2 Stack Memory */
-.extern _boot_stack_size                /* Size of the Stack Memory Segment for Stage 2 Bootloader */
+.extern _stage2_offset                    /* Offset Address of the Stage 2 Bootloader Code */
+.extern _stage2_segment                   /* Segment Address of the Stage 2 Bootloader Code + Data */
+.extern _stage2_size                      /* Length of the Stage 2 Bootloader Code Segment */
+
+.extern _stage1_stack_segment             /* Segment Address for the Bootloader Stage 1 Stack Memory */
+.extern _stage1_stack_start_offset        /* Offset Address for the Bootloader Stage 1 Stack Memory */
+.extern _stage1_stack_size                /* Size of the Stack Memory Segment for Stage 1 Bootloader */
 
 /*
  * Start of the Stage 1 execution
@@ -37,29 +38,29 @@
 .section .text
 .global stage1Start
 stage1Start:
-    cli                                 /* Disable all interrupts */
-    xor ax, ax                          /* Zero out AX register */
-    mov ds, ax                          /* Initialize the DataSegement to 0 */
-    mov es, ax                          /* Initialize the Extra Segement to 0 */
+    cli                                   /* Disable all interrupts */
+    xor ax, ax                            /* Zero out AX register */
+    mov ds, ax                            /* Initialize the DataSegement to 0 */
+    mov es, ax                            /* Initialize the Extra Segement to 0 */
 
-    mov ax, OFFSET _boot_stack_segment  /* Initialize AX to the Stack Segment */
-    mov ss, ax                          /* Initialize the Stack Segement to _boot_stack_segment */
+    mov ax, OFFSET _stage1_stack_segment  /* Initialize AX to the Stack Segment */
+    mov ss, ax                            /* Initialize the Stack Segement to _boot_stack_segment */
 
     /* Initialize the Stack Pointer */
-    mov sp, OFFSET _boot_stack_start_offset
-    mov bp, sp                          /* Initialize the Base Pointer used in Stack Frames */
-    push bp                             /* We save BP with the original SP value on stack */
+    mov sp, OFFSET _stage1_stack_start_offset
+    mov bp, sp                            /* Initialize the Base Pointer used in Stack Frames */
+    push bp                               /* We save BP with the original SP value on stack */
 
-    jmp 0:stage1Main                    /* Far jump to main to set CS (Code Segement) register */
+    jmp 0:stage1Main                      /* Far jump to main to set CS (Code Segement) register */
 
 stage1Main:
-    sti                                 /* Enable all interrupts */
-    mov [BOOT_DRV], dl                  /* remember the boot device */
+    sti                                   /* Enable all interrupts */
+    mov [BOOT_DRV], dl                    /* remember the boot device */
 
     /* Initialize Stack Area for Stack-Monitoring*/
-    mov ax, STACK_PATTERN               /* Pattern used to initialize the RAM Stack */
-    mov bx, OFFSET _boot_stack_segment  /* Get the stack segement */
-    mov cx, OFFSET _boot_stack_size     /* Get the size of the Stack memory */
+    mov ax, STACK_PATTERN                 /* Pattern used to initialize the RAM Stack */
+    mov bx, OFFSET _stage1_stack_segment  /* Get the stack segement */
+    mov cx, OFFSET _stage1_stack_size     /* Get the size of the Stack memory */
 
     /* AX=Pattern, BX=Segment, CX=Size of stack */
     call memInitStack
@@ -96,12 +97,12 @@ stage1Main:
     mov ax, [PART_TAB_ENTRY1 + PART_TABLE_ENTRY_LBA_START_OFFSET]
 
     /* Count of sectors to read */
-    mov si, OFFSET _boot_stage2_max_sector_count
+    mov si, OFFSET _stage2_max_sector_count
 
     /* Destination address to store the "boot partition sectors" which contain Stage2 bootloader */
-    mov bx, OFFSET _boot_stage2_segment /* Setup the ES segement for Stage 2 */
+    mov bx, OFFSET _stage2_segment      /* Setup the ES segement for Stage 2 */
     mov es, bx
-    mov bx, OFFSET _boot_stage2_offset  /* Setup the Offset for Stage 2 */
+    mov bx, OFFSET _stage2_offset       /* Setup the Offset for Stage 2 */
 
 .stage2LoadLoop_stage1Main:
     /* AX=LBA Address, DI=Pointer to DISK_INFO structure */
@@ -122,7 +123,7 @@ stage1Main:
 
     /* If we got an overflow, we need to switch the segment */
 .stage2UpdateSeg_stage1Main:
-    mov bx, OFFSET _boot_stage2_offset  /* If we got an overflow, load the offset for Stage2 again */
+    mov bx, OFFSET _stage2_offset       /* If we got an overflow, load the offset for Stage2 again */
     push ax                             /* We use AX to modify ES, therefore save the current value */
     mov ax, es                          /* Get the current segment */
     add ax, 0x1000                      /* Increment the segment address to switch to next segment 0x1000 = next 64kb */
@@ -136,7 +137,7 @@ stage1Main:
 .stage2LoadDone_stage1Main:
     mov ax, 0                           /* */
     mov es, ax                          /* Reset the ES segement to 0 */
-    jmp _boot_stage2_segment:0          /* Use stage 2 segement as new code segement */
+    jmp _stage2_segment:0               /* Use stage 2 segement as new code segement */
 
 
 /*

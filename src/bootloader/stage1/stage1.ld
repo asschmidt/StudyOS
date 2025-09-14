@@ -8,10 +8,8 @@
  * -------------------------------------------------------
  * Start     End        Size        Usage
  * 0x00500   0x01500    4 KiB       .bss for Bootloader Stage 1
- * 0x07500   0x07BFF    1792 Bytes  Reserved Memory
  * 0x07C00 	 0x07DFF 	512 bytes 	OS BootSector Stage 1
- * 0x07E00   0x17DFF    64 KiB      OS Bootloader Stage 2
- * 0x17E00   0x7FBFF    415,5 KiB   Reserved Memory
+ * 0x07E00   0x0FDFF    32 KiB      OS Bootloader Stage 2
  * 0x7FC00   0x7FFFF    1 KiB       Stack Memory Stage 1
  *
  * For the bootsector code, only 440 Byte are available
@@ -49,18 +47,18 @@ DUMMY_ADDRESS       = 0x00100000;
  * Defines the start address and size of the Stage 1 bootloader
  * These values are pre-defined by the BIOS and cannot be changed
  */
-BOOT_ADDRESS        = 0x7C00;
-BOOTLOADER_LENGTH   = 440;
+STAGE1_ADR              = 0x7C00;
+STAGE1_SIZE             = 440;
 
 /*
  * Defines the memory address for the Stage2 bootloader. The Stage1
  * bootloader will load the binary of the Stage2 bootloader into this
  * memory address and jumps to this address to execute Stage2
  */
-BOOTLOADER_STAGE2_ADR     = 0x7E00;
-BOOTLOADER_STAGE2_OFFSET  = 0x0;
-BOOTLOADER_STAGE2_SEGMENT = (BOOTLOADER_STAGE2_ADR - BOOTLOADER_STAGE2_OFFSET) / 16;
-BOOTLOADER_STAGE2_LENGHT  = 64K;
+STAGE2_ADR              = 0x7E00;
+STAGE2_SIZE             = 32K;
+STAGE2_OFFSET           = 0x0;
+STAGE2_SEGMENT          = (STAGE2_ADR - STAGE2_OFFSET) / 16;
 
 /*
  * Defines the start address and size for the RAM used by the Stage1
@@ -68,8 +66,10 @@ BOOTLOADER_STAGE2_LENGHT  = 64K;
  * initialized variables and must be loaded into memory. Therefore the
  * .data section must reside in the bootloader binary
  */
-BOOT_RAM_ADR        = 0x0500;
-BOOT_RAM_SIZE       = 4K;
+STAGE1_RAM_ADR          = 0x0500;
+STAGE1_RAM_SIZE         = 4K;
+STAGE1_RAM_OFFSET       = 0x0;
+STAGE1_RAM_SEGMENT      = (STAGE1_RAM_ADR - STAGE1_RAM_OFFSET) / 16;
 
 /*
  * Defines the linear address and size of the Stack for Stage1 Bootloader.
@@ -78,23 +78,22 @@ BOOT_RAM_SIZE       = 4K;
  * offset pair for usage in the bootloader code. The Linker can handle the adress
  * calculations for the stack with more than 16 Bit.
  */
-BOOT_STACK_ADR      = 0x7FC00;
-BOOT_STACK_SIZE     = 1K;
+STAGE1_STACK_ADR        = 0x7FC00;
+STAGE1_STACK_SIZE       = 1K;
+STAGE1_STACK_OFFSET     = 0x0;
+STAGE1_STACK_SEGMENT    = (STAGE1_STACK_ADR - STAGE1_STACK_OFFSET) / 16;
 
-/*
- * Define the offset for the stack segment (Offset 0x400 = 1 KiB --> Last address in Stack)
- * and calculate the corresponding segment for the physical address of the stack
- * based on the chosen offset
- */
-BOOT_STACK_OFFSET   = 0x0;
-BOOT_STACK_SEGMENT  = (BOOT_STACK_ADR - BOOT_STACK_OFFSET) / 16;
 
 MEMORY
 {
-    /* Memory Areas for Stage1 Bootloader */
-    BOOTLOADER_RAM (rw)	: ORIGIN = BOOT_RAM_ADR,        LENGTH = BOOT_RAM_SIZE
-    BOOTLOADER (rwx) 	: ORIGIN = BOOT_ADDRESS, 	    LENGTH = BOOTLOADER_LENGTH
-    BOOTLOADER_STACK(rw): ORIGIN = BOOT_STACK_ADR       LENGTH = BOOT_STACK_SIZE
+    /* Memory Area for Stage 1 Bootloader RAM */
+    STAGE1_RAM (rw)	    : ORIGIN = STAGE1_RAM_ADR,      LENGTH = STAGE1_RAM_SIZE
+
+    /* Memory Area for Stage 1 Bootloader Stack */
+    STAGE1_STACK(rw)    : ORIGIN = STAGE1_STACK_ADR     LENGTH = STAGE1_STACK_SIZE
+
+    /* Memory Areas for Stage 1 Bootloader Code + Data */
+    STAGE1 (rwx) 	    : ORIGIN = STAGE1_ADR, 	        LENGTH = STAGE1_SIZE
 
     /* Dummy Memory region to store sections not part of the final binary */
     /* The address space of this region doesn't really matter, we should
@@ -103,19 +102,17 @@ MEMORY
 }
 
 /* Define the size of the Stack used by the Stage1 Bootloader */
-_boot_stack_offset  = BOOT_STACK_OFFSET;
-_boot_stack_segment = BOOT_STACK_SEGMENT;
-_boot_stack_size    = BOOT_STACK_SIZE;
-
-/* Symbols used in Stage1 Bootloader to setup the complete RAM area */
-_ram_start        = ORIGIN(BOOTLOADER_RAM);
-_ram_size	      = LENGTH(BOOTLOADER_RAM);
+_stage1_stack_offset        = STAGE1_STACK_OFFSET;
+_stage1_stack_segment       = STAGE1_STACK_SEGMENT;
+_stage1_stack_size          = STAGE1_STACK_SIZE;
 
 /* Define the addresses (segment + offset) for the Stage2 Bootloader */
-_boot_stage2_offset  = BOOTLOADER_STAGE2_OFFSET;
-_boot_stage2_segment = BOOTLOADER_STAGE2_SEGMENT;
-_boot_stage2_length  = BOOTLOADER_STAGE2_LENGHT;
-_boot_stage2_max_sector_count = BOOTLOADER_STAGE2_LENGHT / 512;
+_stage2_offset              = STAGE2_OFFSET;
+_stage2_segment             = STAGE2_SEGMENT;
+_stage2_length              = STAGE2_SIZE;
+
+/* Calculate the maximum sectors to read for the maximum lenght of Stage 2 */
+_stage2_max_sector_count    = STAGE2_SIZE / 512;
 
 SECTIONS
 {
@@ -133,7 +130,7 @@ SECTIONS
         /* Insert all .text.* input sections */
     	*(.text);
         *(.text.*);
-   	} > BOOTLOADER
+   	} > STAGE1
 
     /* .rodata section containing the read-only (constant) data */
 	.rodata :
@@ -142,7 +139,7 @@ SECTIONS
         /* Insert all .rodata input sections */
     	*(.rodata);
         . = ALIGN(4);
-	} > BOOTLOADER
+	} > STAGE1
 
     /* .data section containing all initialized variables */
 	.data :
@@ -152,17 +149,17 @@ SECTIONS
    		*(.data);
 
         . = ALIGN(4);
-	} > BOOTLOADER
+	} > STAGE1
 
     /* .fill section used to fill the empty code space with NOPs */
     .fill :
     {
         . = ALIGN(4);
     	FILL(0x90);
-    	. = ORIGIN(BOOTLOADER) + LENGTH(BOOTLOADER) - 1;
+    	. = ORIGIN(STAGE1) + LENGTH(STAGE1) - 1;
     	BYTE(0x90);
         . = ALIGN(4);
-    } > BOOTLOADER
+    } > STAGE1
 
     /* .bss section used to store uninitialized variables */
 	.bss :
@@ -183,23 +180,23 @@ SECTIONS
     	_bss_end = .;
 
         . = ALIGN(4);
-	} > BOOTLOADER_RAM
+	} > STAGE1_RAM
 
     /*
      * Calculate the start for the .stack section based on the RAM memory size and the
      * configured stack size. The .stack section is moved to the end of the RAM region
      */
-    _stack_section_start = ALIGN(ORIGIN(BOOTLOADER_STACK) + LENGTH(BOOTLOADER_STACK) - _boot_stack_size, 4);
-    .stack _stack_section_start :
+    _stage1_stack_section_start = ALIGN(ORIGIN(STAGE1_STACK) + LENGTH(STAGE1_STACK) - _stage1_stack_size, 4);
+    .stack _stage1_stack_section_start :
     {
         . = ALIGN(4);
 
-        _boot_stack_end  = .;
+        _stage1_stack_end  = .;
 
         /* The fill-bytes are not stored in the binary */
         FILL(0xCD);
 
-        . = ORIGIN(BOOTLOADER_STACK) + LENGTH(BOOTLOADER_STACK) - 1;
+        . = ORIGIN(STAGE1_STACK) + LENGTH(STAGE1_STACK) - 1;
 
         /*
          * This start symbol represents the linera address of the last usable stack address.
@@ -207,10 +204,10 @@ SECTIONS
          * because the stack area is put and the end of the conventional address space which
          * cannot be addressed by a single 16 bit address
          */
-        _boot_stack_start = .;
+        _stage1_stack_start = .;
 
         . = ALIGN(4);
-    } > BOOTLOADER_STACK
+    } > STAGE1_STACK
 
     /*
      * Calculate the start offset address of the stack
@@ -223,7 +220,7 @@ SECTIONS
      * outside the valid stack memory
      */
 
-    _boot_stack_start_offset = BOOT_STACK_OFFSET + BOOT_STACK_SIZE;
+    _stage1_stack_start_offset = STAGE1_STACK_OFFSET + STAGE1_STACK_SIZE;
 
     /* Helper Sections not relevant for the final binary, but helpful for debugging */
     .offsets :
