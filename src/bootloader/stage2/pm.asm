@@ -129,8 +129,8 @@ pmInit:
 	/* Enable all interrupts */
     sti
 
-    /* Initialize the IDT Entries for 0x32...0xFF */
-    /* for (i=0xFF; i>0x31; i--) */
+    /* Initialize the IDT Entries for 0x20...0xFF */
+    /* for (i=0xFF; i>0x19; i--) */
     mov ecx, 0xFF
 .initIDTLoop_pmInit:
 
@@ -144,7 +144,7 @@ pmInit:
     add esp, 20
 
     dec ecx
-    cmp ecx, 0x31
+    cmp ecx, 0x19
     jne .initIDTLoop_pmInit
 
     /* Remap the PIC with the correct offset */
