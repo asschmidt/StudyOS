@@ -50,6 +50,12 @@ typedef struct _IDT_ENTRY {
    uint16_t offset_2;                   // 2 Byte - offset bits 16..31
 } IDT_ENTRY;                            // 8 Byte
 
+typedef struct _PIT_DATA {
+    uint16_t PIT_reloadValue;           // 2 Byte
+    uint32_t irq0Frequency;             // 4 Byte
+    uint32_t irq0Milliseconds;          // 4 Byte
+} PIT_DATA;
+
 #pragma pack(pop)
 
 #endif

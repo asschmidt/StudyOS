@@ -14,3 +14,5 @@ GDT_ENTRY gGDTEntry __attribute__ ((section (".debug_helper"))) = {0};
 
 IDT_DESC gIDTDesc __attribute__ ((section (".debug_helper"))) = {0};
 IDT_ENTRY gIDTEntry __attribute__ ((section (".debug_helper"))) = {0};
+
+PIT_DATA gPITData __attribute__ ((section (".debug_helper"))) = {0};
