@@ -18,6 +18,10 @@
 .extern _boot_stack_start_offset        /* Offset Address for the Bootloader Stage 2 Stack Memory */
 .extern _boot_stack_size                /* Size of the Stack Memory Segment for Stage 2 Bootloader */
 
+.extern _boot_ram_segment               /* Segment Address for the Bootloader Stage 2 RAM */
+.extern _boot_ram_offset                /* Offset Address for the Bootloader Stage 2 RAM */
+.extern _boot_ram_size                  /* Size of the RAM Segment for Stage 2 Bootloader */
+
 /*
  * Start of the Stage 2 execution
  * The following code is 16 Bit
@@ -27,7 +31,9 @@
 .globl stage2Start
 stage2Start:
 	xor ax, ax	            		    /* Zero out AX register */
-    mov es, ax              		    /* Initialize the Extra Segement to 0 */
+
+    mov ax, OFFSET _boot_ram_segment    /* Get the segment for the RAM of bootloader stage 2 */
+    mov es, ax              		    /* Initialize the Extra Segement to _boot_ram_segment */
 
 	mov ax, OFFSET _boot_stage2_segment /* Get the segment for the bootloader stage 2 */
 	mov ds, ax              		    /* Initialize the DataSegement to _boot_stage2_segment */
@@ -37,10 +43,10 @@ stage2Start:
 
     /* At this point we have the following segment configuration
      *
-     * CS: 0x7E0
-     * ES: 0x00
-     * DS: 0x7E0 (_boot_stage2_segment)
-     * SS: 0x7800 (_boot_stack_segment)
+     * CS: 0x07E0 (_boot_stage2_segment)
+     * ES: 0x7D00 (_boot_ram_segment)
+     * DS: 0x07E0 (_boot_stage2_segment)
+     * SS: 0x7F00 (_boot_stack_segment)
      */
 
 	/* Initialize the Stack Pointer */
@@ -52,8 +58,8 @@ stage2Start:
     call biosClearScreen                /* Clear the screeen */
 
     /* biosSetCursor(0, 0); */
-    push 0                              /* Column idx for ioSetCursor */
-    push 0                              /* Row idx for ioSetCursor */
+    push 0                              /* Column idx for biosSetCursor */
+    push 0                              /* Row idx for biosSetCursor */
     call biosSetCursor
     add sp, 4
 
@@ -74,4 +80,3 @@ stage2Done:
 
 .section .rodata
 MSG_LOADING: .asciz  "Starting Stage 2...\r\n"
-

@@ -8,13 +8,11 @@
  * Memory Map during startup
  * -------------------------------------------------------
  * Start     End        Size        Usage
- * 0x00500   0x074FF    28 KiB      .bss for Bootloader Stage 1 + 2
- * 0x07500   0x07BFF    1792 Bytes  Reserved Memory
  * 0x07C00 	 0x07DFF 	512 bytes 	OS BootSector Stage 1
- * 0x07E00   0x17DFF    64 KiB      OS Bootloader Stage 2
- * 0x17E00   0x77FFF    384,5 KiB   Reserved Memory
- * 0x78000   0x7FBFF    31 KiB      Stack Memory Stage 2
- * 0x7FC00   0x7FFFF    1 KiB       Stack Memory Stage 1 + 2
+ * 0x07E00   0x0FDFF    32 KiB      OS Bootloader Stage 2
+ * 0x0FE00   0x11DFF    8 KiB       .bss for Bootloader Stage 2
+ * 0x11E00   0x7CFFF    428,5 KiB   Reserved Memory
+ * 0x7F000   0x7FFFF    4 KiB       Stack Memory Stage 2
  *
  *
 */
@@ -39,13 +37,6 @@ DUMMY_ADDRESS       = 0x00100000;
  *****************************************************************************/
 
 /*
- * Defines the start address and size of the Stage 1 bootloader
- * These values are pre-defined by the BIOS and cannot be changed
- */
-BOOT_ADDRESS        = 0x7C00;
-BOOTLOADER_LENGTH   = 440;
-
-/*
  * Defines the memory address for the Stage2 bootloader. The Stage1
  * bootloader will load the binary of the Stage2 bootloader into this
  * memory address and jumps to this address to execute Stage2
@@ -53,7 +44,7 @@ BOOTLOADER_LENGTH   = 440;
 BOOTLOADER_STAGE2_ADR     = 0x7E00;
 BOOTLOADER_STAGE2_OFFSET  = 0x0;
 BOOTLOADER_STAGE2_SEGMENT = (BOOTLOADER_STAGE2_ADR - BOOTLOADER_STAGE2_OFFSET) / 16;
-BOOTLOADER_STAGE2_LENGHT  = 64K;
+BOOTLOADER_STAGE2_LENGHT  = 32K;
 
 /*
  * Defines the start address and size for the RAM used by the Stage2
@@ -61,8 +52,10 @@ BOOTLOADER_STAGE2_LENGHT  = 64K;
  * initialized variables and must be loaded into memory. Therefore the
  * .data section must reside in the bootloader binary
  */
-BOOT_RAM_ADR        = 0x0500;
-BOOT_RAM_SIZE       = 28K;
+BOOT_RAM_ADR        = 0x7D000;
+BOOT_RAM_SIZE       = 8K;
+BOOT_RAM_OFFSET     = 0x0;
+BOOT_RAM_SEGMENT    = (BOOT_RAM_ADR - BOOT_RAM_OFFSET) / 16;
 
 /*
  * Defines the address (offset and segment) and size of the Stack for Stage2
@@ -71,28 +64,24 @@ BOOT_RAM_SIZE       = 28K;
  * offset pair for usage in the bootloader code. The Linker can handle the adress
  * calculations for the stack with more than 16 Bit.
  */
-BOOT_STACK_ADR      = 0x78000;
-BOOT_STACK_SIZE     = 32K;
-
-/*
- * Define the offset for the stack segment (Offset 0x400 = 1 KiB --> Last address in Stack)
- * and calculate the corresponding segment for the physical address of the stack
- * based on the chosen offset
- */
+BOOT_STACK_ADR      = 0x7F000;
+BOOT_STACK_SIZE     = 4K;
 BOOT_STACK_OFFSET   = 0x0;
 BOOT_STACK_SEGMENT  = (BOOT_STACK_ADR - BOOT_STACK_OFFSET) / 16;
 
+
 MEMORY
 {
-    /* Memory Areas for Stage1 Bootloader */
-    BOOTLOADER_RAM (rw)	        : ORIGIN = BOOT_RAM_ADR,            LENGTH = BOOT_RAM_SIZE
-    BOOTLOADER (rx) 	        : ORIGIN = BOOT_ADDRESS, 	        LENGTH = BOOTLOADER_LENGTH
+    /* Memory Areas for Stage 2 RAM */
+    BOOTLOADER_RAM (rw)	        : ORIGIN = BOOT_RAM_ADR,                                            LENGTH = BOOT_RAM_SIZE
+    BOOTLOADER_RAM_VMA (rw)	    : ORIGIN = BOOTLOADER_STAGE2_OFFSET + BOOTLOADER_STAGE2_LENGHT,     LENGTH = BOOT_RAM_SIZE
+
+    /* Memory Area for Stage 2 Stack */
     BOOTLOADER_STACK(rw)        : ORIGIN = BOOT_STACK_ADR           LENGTH = BOOT_STACK_SIZE
 
-    /* Memory Area for Stage2 Bootloader */
+    /* Memory Area for Stage 2 Bootloader */
     BOOTLOADER_STAGE2 (rx)      : ORIGIN = BOOTLOADER_STAGE2_ADR    LENGTH = BOOTLOADER_STAGE2_LENGHT
-    /* Memory Area for Stage2 Bootloader providing the offset as origin */
-    BOOTLOADER_STAGE2_EXE (rwx) : ORIGIN = BOOTLOADER_STAGE2_OFFSET LENGTH = BOOTLOADER_STAGE2_LENGHT
+    BOOTLOADER_STAGE2_VMA (rwx) : ORIGIN = BOOTLOADER_STAGE2_OFFSET LENGTH = BOOTLOADER_STAGE2_LENGHT
 
     /* Dummy Memory region to store sections not part of the final binary */
     /* The address space of this region doesn't really matter, we should
@@ -100,20 +89,24 @@ MEMORY
     DUMMY (rwx)                 : ORIGIN = DUMMY_ADDRESS,           LENGTH = 10M
 }
 
-/* Define the size of the Stack used by the Stage2 Bootloader */
-_boot_stack_offset  = BOOT_STACK_OFFSET;
-_boot_stack_segment = BOOT_STACK_SEGMENT;
-_boot_stack_size    = BOOT_STACK_SIZE;
-
 /* Symbols used in Stage2 Bootloader to setup the complete RAM area */
 _ram_start        = ORIGIN(BOOTLOADER_RAM);
-_ram_size	      = LENGTH(BOOTLOADER_RAM);
+_ram_size	     = LENGTH(BOOTLOADER_RAM);
+
+/* Define the size of the Stack used by the Stage2 Bootloader */
+_boot_stack_offset   = BOOT_STACK_OFFSET;
+_boot_stack_segment  = BOOT_STACK_SEGMENT;
+_boot_stack_size     = BOOT_STACK_SIZE;
 
 /* Define the addresses (segment + offset) for the Stage2 Bootloader */
 _boot_stage2_offset  = BOOTLOADER_STAGE2_OFFSET;
 _boot_stage2_segment = BOOTLOADER_STAGE2_SEGMENT;
 _boot_stage2_length  = BOOTLOADER_STAGE2_LENGHT;
 
+/* Define the size of the Stack used by the Stage2 Bootloader */
+_boot_ram_offset     = BOOT_RAM_OFFSET;
+_boot_ram_segment    = BOOT_RAM_SEGMENT;
+_boot_ram_size       = BOOT_RAM_SIZE;
 
 SECTIONS
 {
@@ -125,7 +118,7 @@ SECTIONS
         *(.text.*);
 
         . = ALIGN(4);
-   	} > BOOTLOADER_STAGE2_EXE AT > BOOTLOADER_STAGE2
+   	} > BOOTLOADER_STAGE2_VMA AT> BOOTLOADER_STAGE2
 
 	.rodata :
    	{
@@ -133,7 +126,7 @@ SECTIONS
     	KEEP(*(.rodata));
         . = ALIGN(4);
 
-	} > BOOTLOADER_STAGE2_EXE AT > BOOTLOADER_STAGE2
+	} > BOOTLOADER_STAGE2_VMA AT> BOOTLOADER_STAGE2
 
 	.data :
    	{
@@ -147,7 +140,7 @@ SECTIONS
     	_data_end = .;
         . = ALIGN(4);
 
-	} > BOOTLOADER_STAGE2_EXE AT > BOOTLOADER_STAGE2
+	} > BOOTLOADER_STAGE2_VMA AT> BOOTLOADER_STAGE2
 
     .gdt :
    	{
@@ -155,7 +148,7 @@ SECTIONS
     	KEEP(*(.gdt));
         . = ALIGN(4);
 
-	} > BOOTLOADER_STAGE2_EXE AT > BOOTLOADER_STAGE2
+	} > BOOTLOADER_STAGE2_VMA AT> BOOTLOADER_STAGE2
 
 	.bss :
    	{
@@ -175,7 +168,7 @@ SECTIONS
     	_bss_end = .;
 
         . = ALIGN(4);
-	} > BOOTLOADER_RAM
+	} > BOOTLOADER_RAM_VMA AT> BOOTLOADER_RAM
 
     /*
      * Calculate the start for the .stack section based on the RAM memory size and the
