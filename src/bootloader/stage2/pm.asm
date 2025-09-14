@@ -178,4 +178,5 @@ PM_MESSAGE:         .asciz "Switched to Protected Mode"
 
 .section .bss
 /* struct PIT_DATA PIT_STAGE2_DATA; */
+.global PIT_STAGE2_DATA
 PIT_STAGE2_DATA:    .space PIT_DATA_SIZE

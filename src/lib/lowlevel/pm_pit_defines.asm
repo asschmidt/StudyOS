@@ -53,9 +53,9 @@
 /* PIT Data struct definition */
 /* struct PIT_DATA
  *  {
- *       int16_t PIT_reloadValue;       // 2 Byte
- *       int32_t irq0Frequency;         // 4 Byte
- *       int32_t irq0Milliseconds;      // 4 Byte
+ *       uint16_t PIT_reloadValue;       // 2 Byte
+ *       uint32_t irq0Frequency;         // 4 Byte
+ *       uint32_t irq0Milliseconds;      // 4 Byte
  *  };
  */
 #define PIT_DATA_SIZE                   10

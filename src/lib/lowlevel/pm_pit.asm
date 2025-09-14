@@ -32,14 +32,16 @@ pmPITInitialize:
     pushad
     push ebx
     push edx
+    push edi
 
-    mov ebx, [ebp + 12]     /* Get the frequency from stack */
-    mov eax, PIT_MAX_DIV    /* Prepare eax with max divider value */
-    cmp ebx, PIT_MIN_FREQ
+    mov ebx, [ebp + 12]                         /* Get the frequency from stack */
+    mov eax, PIT_MAX_DIV                        /* Prepare eax with max divider value (PIT_MAX_DIV) */
+    cmp ebx, PIT_MIN_FREQ                       /* PIT_MIN_FREQ */
+
     /* If freq <= PIT_MIN_FREQ, use the max divider value for reload */
     jbe pmPITInitialize_gotReloadValue
 
-    mov eax, 1              /* Prepare eax with the min divider --> max frequency */
+    mov eax, 1                                  /* Prepare eax with the min divider --> max frequency */
     cmp ebx, PIT_FREQUENCY
     /* If freq >= PIT_FREQUENCY, use the min divider of 1 */
     jae pmPITInitialize_gotReloadValue
@@ -47,26 +49,28 @@ pmPITInitialize:
     /* If freq > 18 Hz and freq < PIT_FREQUENCY, calculate the reload value */
     mov eax, PIT_FREQUENCY
     mov edx, 0
-    /* eax = PIT_FRQUENCY / freq, edx = reminder */
-    div ebx
+    div ebx                                     /* eax = PIT_FRQUENCY / freq, edx = reminder */
 
     /* Perform rounding for better accuracy */
-    cmp edx, PIT_FREQUENCY / 2
+    cmp edx, PIT_FREQUENCY / 2                  /* PIT_FREQUENCY / 2 */
     jb pmPITInitialize_gotReloadValue
     /* Round up */
     inc eax
 
 pmPITInitialize_gotReloadValue:
     /* Store reload value in structure */
-    mov WORD PTR [ebp + 8 + PIT_DATA_RELOAD_VALUE_OFF], ax  /* ebp + 8 + PIT_DATA_RELOAD_VALUE_OFF */
+    mov edi, [ebp +8]
+    mov WORD PTR [edi + PIT_DATA_RELOAD_VALUE_OFF], ax  /* PIT_DATA_RELOAD_VALUE_OFF */
+
     /* Calculate frequency from reload value */
-    mov ebx, eax                /* ebx = Reload Value */
-    mov eax, PIT_FREQUENCY      /* eax = PIT_Frequency */
+    mov ebx, eax                                /* ebx = Reload Value */
+    mov eax, PIT_FREQUENCY                      /* eax = PIT_Frequency */
     mov edx, 0
-    div ebx                     /* eax = eax / ebx, reminder = edx */
+    div ebx                                     /* eax = eax / ebx, reminder = edx */
 
     /* Store backward calculated frequency in struct */
-    mov [ebp + 8 + PIT_DATA_IRQ0_FREQ_OFF], eax     /* ebp + 8 + PIT_DATA_IRQ0_FREQ_OFF */
+    mov edi, [ebp + 8]
+    mov [edi + PIT_DATA_IRQ0_FREQ_OFF], eax     /* PIT_DATA_IRQ0_FREQ_OFF */
 
     /* Program the PIT Channel */
     pushfd
@@ -79,7 +83,8 @@ pmPITInitialize_gotReloadValue:
     add esp, 8
 
     xor eax, eax
-    mov ax, WORD PTR [ebp + 8 + PIT_DATA_RELOAD_VALUE_OFF]  /* ebp + 8 + PIT_DATA_RELOAD_VALUE_OFF */
+    mov edi, [ebp + 8]
+    mov ax, WORD PTR [edi + PIT_DATA_RELOAD_VALUE_OFF]  /* ebp + 8 + PIT_DATA_RELOAD_VALUE_OFF */
     mov ebx, 0
     mov bl, al
 
@@ -100,6 +105,7 @@ pmPITInitialize_gotReloadValue:
 
     popfd
 
+    pop edi
     pop edx
     pop ebx
     popad
