@@ -46,9 +46,9 @@ pmSwitch:
     /* Disable all interrupts */
 	cli
 
-    /* pmPrepareGDT(&gdtStartTemp, &gdtEndTemp, &_boot_stage2_segment, &gdtDescriptorTemp); */
+    /* pmPrepareGDT(&gdtStartTemp, &gdtEndTemp, &_stage2_segment, &gdtDescriptorTemp); */
     push OFFSET gdtDescriptorTemp
-    push OFFSET _boot_stage2_segment
+    push OFFSET _stage2_segment
     push OFFSET gdtEndTemp
     push OFFSET gdtStartTemp
     call pmPrepareGDT
@@ -88,18 +88,18 @@ pmInit:
      * StackPointer = ((_boot_stack_segment * 16) + _boot_stack_start_offset) - _boot_stage2_segment
      */
     xor eax, eax
-    mov eax, OFFSET _boot_stack_segment
-    /* (_boot_stack_segment * 16) */
+    mov eax, OFFSET _stage2_stack_segment
+    /* (_stage2_stack_segment * 16) */
     shl eax, 4
 
-    mov ebx, OFFSET _boot_stack_start_offset
-    /* Add _boot_stack_start_offset to prepared segment address */
+    mov ebx, OFFSET _stage2_stack_start_offset
+    /* Add _stage2_stack_start_offset to prepared segment address */
     add eax, ebx
 
-    mov ebx, OFFSET _boot_stage2_segment
-    /* _boot_stage2_segment * 16 */
+    mov ebx, OFFSET _stage2_segment
+    /* _stage2_segment * 16 */
     shl ebx, 4
-    /* Substract _boot_stage2_segment from linear address of boot stack */
+    /* Substract _stage2_segment from linear address of boot stack */
     sub eax, ebx
 
     /* Set the Base-Pointer and Stack-Pointer to calculated address */
@@ -113,8 +113,8 @@ pmInit:
     call pmPutString
     add esp, 8
 
-    /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_boot_stage2_segment); */
-    push OFFSET _boot_stage2_segment
+    /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_stage2_segment); */
+    push OFFSET _stage2_segment
     push IDT_ENTRY_COUNT                    /* IDT_ENTRY_COUNT */
     push OFFSET idtTemp
     push OFFSET idtDescriptorTemp
