@@ -16,6 +16,8 @@
 #include "pm_pic_defines.asm"
 /* Include IDT Defines */
 #include "pm_idt_defines.asm"
+/* Include PIT Defines */
+#include "pm_pit_defines.asm"
 
 /*
  * External Symbols
@@ -79,7 +81,7 @@ pmInit:
     mov gs, ax
 
     /* Initialize the stack pointer to the original stack memory but using the GDT segments */
-    /* In Real-Mode, the stack segment is located at 0x7800:0000. To use the same physical memory
+    /* In Real-Mode, the stack segment is located at 0x7F00:0000. To use the same physical memory
      * in Protected-Mode, we need to consider the Data-Segement Offset in GDT (which is 0x7E00)
      * To calculate the stack pointer for the use with the GDT data segment, but using same memory
      * as we had in Real-Mode, we must peform the following calculation
@@ -132,7 +134,7 @@ pmInit:
     mov ecx, 0xFF
 .initIDTLoop_pmInit:
 
-    /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, 0x8F, CODE_SEG); */
+    /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, IDT_TYPE_ATTRIB_INT32, CODE_SEG); */
     push CODE_SEG                           /* CODE_SEG */
     push IDT_TYPE_ATTRIB_INT32              /* IDT_TYPE_ATTRIB_INT32 */
     push OFFSET pmDefaultISR
@@ -158,9 +160,22 @@ pmInit:
     call pmPICSetMask
     add esp, 4
 
+    /* Init PIT */
+    /* pmPITInitialize(&PIT_STAGE2_DATA, 1000); */
+    push 1000
+    push OFFSET PIT_STAGE2_DATA
+    call pmPITInitialize
+    add esp, 8
+
+
 .nopLoop_pmInit:
     nop
     jmp .nopLoop_pmInit
 
 .section .rodata
-PM_MESSAGE: .asciz "Switched to Protected Mode"
+/* const char* PM_MESSAGE="..."; */
+PM_MESSAGE:         .asciz "Switched to Protected Mode"
+
+.section .bss
+/* struct PIT_DATA PIT_STAGE2_DATA; */
+PIT_STAGE2_DATA:    .space PIT_DATA_SIZE

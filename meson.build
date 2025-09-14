@@ -1,4 +1,4 @@
-project('StudyOS', 'c', 'cpp', version: '0.0.1', meson_version: '1.8.3')
+project('StudyOS', 'c', 'cpp', version: '0.0.1', meson_version: '>=1.8.3')
 
 
 ###############################################################################
@@ -117,6 +117,7 @@ lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_gdt.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_idt.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_gpio.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_pic.asm')
+lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_pit.asm')
 
 # Preprocess the ASM files
 lib_lowlevel_preproc_files = lib_lowlevel_asm_preproc.process(lib_lowlevel_source_files)
