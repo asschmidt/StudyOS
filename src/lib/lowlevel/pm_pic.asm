@@ -300,6 +300,62 @@ pmPICReadISR:
     leave
     ret
 
+/*
+ * Sets the provided IRQ mask for the specified PIC
+ *
+ * void pmPICSetMask(uint8_t picNo, uint8_t mask);
+ *
+ * Parameters:
+ *    EBP + 8:  mask
+ *    EBP + 12: picNo (1 or 2)
+ *
+ * Returns:
+ *    -
+ *
+ */
+.code32
+.section .text.pmPICSetMask,"ax",@progbits
+.global pmPICSetMask
+pmPICSetMask:
+    push ebp
+    mov ebp, esp
+
+    push edi
+    push esi
+    push ecx
+
+    /* Get PIC no from parameter stack */
+    mov edi, [ebp + 8]
+    cmp edi, 1
+
+    /* If PIC no equals to 1, we use PIC1 */
+    je .maskPIC1_pmPICSetMask
+
+    /* Otherwise we mask on PIC2 by using the PIC2 Data Register */
+    mov esi, PIC2_DATA_REG                  /* PIC2_DATA_REG */
+    jmp .maskWrite_pmPICSetMask
+
+.maskPIC1_pmPICSetMask:
+    mov esi, PIC1_DATA_REG                  /* PIC1_DATA_REG */
+
+.maskWrite_pmPICSetMask:
+
+    /* Get the mask from the parameter stack */
+    mov eax, [ebp + 12]
+
+    /* Write Mask value to PIC */
+    /* pmPortOutByte(picPort, maskValue); */
+    push eax
+    push esi
+    call pmPortOutByte
+    add esp, 8
+
+    pop ecx
+    pop esi
+    pop edi
+
+    leave
+    ret
 
 /*
  * Masks out the provided IRQ for Master and Slave PIC

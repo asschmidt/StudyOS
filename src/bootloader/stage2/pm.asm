@@ -68,9 +68,9 @@ pmSwitch:
 
 
 .code32
-.section .text
-.align 8
+.section .text.pmInit,"ax",@progbits
 .global pmInit
+.align 8
 pmInit:
 	/* Initialize all segment selectors with the data segement from temporary GDT */
     mov ax, DATA_SEG                        /* DATA_SEG */
@@ -152,6 +152,12 @@ pmInit:
     push PIC2_OFFSET                        /* Offset for PIC2 --> IRQ 8..15 -> IDT: 0x28...0x2F (PIC2_OFFSET) */
     push PIC1_OFFSET                        /* Offset for PIC1 --> IRQ 0..7  -> IDT: 0x20...0x27 (PIC1_OFFSET) */
     call pmPICRemap
+    add esp, 8
+
+    /* pmPICSetMask(1, 0xFF); */
+    push 0xFF
+    push 0x01
+    call pmPICSetMask
     add esp, 8
 
     /* Mask out Timer Interrupt */
