@@ -304,19 +304,19 @@ pmPICReadISR:
 /*
  * Masks out the provided IRQ for Master and Slave PIC
  *
- * void pmPICSetMask(uint8_t irqLine);
+ * void pmPICMaskIRQ(uint8_t irqLine);
  *
  * Parameters:
- *    EBP + 8:  ocwirqLine
+ *    EBP + 8:  irqLine
  *
  * Returns:
  *    -
  *
  */
 .code32
-.section .text.pmPICSetMask,"ax",@progbits
-.global pmPICSetMask
-pmPICSetMask:
+.section .text.pmPICMaskIRQ,"ax",@progbits
+.global pmPICMaskIRQ
+pmPICMaskIRQ:
     push ebp
     mov ebp, esp
 
@@ -327,17 +327,19 @@ pmPICSetMask:
     /* Get IRQ Line from parameter stack */
     mov edi, [ebp + 8]
     cmp edi, 8
+
     /* If the IRQ Line is less than 8, we only mask on PIC1 */
-    jl .maskPIC1_pmPICSetMask
+    jl .maskPIC1_pmPICMaskIRQ
+
     /* Otherwise we mask on PIC2 by using the PIC2 Data Register and correcting the IRQ Line for PIC2 */
     mov esi, PIC2_DATA_REG                  /* PIC2_DATA_REG */
     sub edi, 8
-    jmp .maskWrite_pmPICSetMask
+    jmp .maskWrite_pmPICMaskIRQ
 
-.maskPIC1_pmPICSetMask:
+.maskPIC1_pmPICMaskIRQ:
     mov esi, PIC1_DATA_REG                  /* PIC1_DATA_REG */
 
-.maskWrite_pmPICSetMask:
+.maskWrite_pmPICMaskIRQ:
 
     /* Read the current Mask Register Value */
     /* eax = pmPortInByte(maskValue); */
@@ -365,7 +367,72 @@ pmPICSetMask:
     leave
     ret
 
+/*
+ * Removes the mask for the provided IRQ for Master and Slave PIC
+ *
+ * void pmPICUnmaskIRQ(uint8_t irqLine);
+ *
+ * Parameters:
+ *    EBP + 8:  irqLine
+ *
+ * Returns:
+ *    -
+ *
+ */
+.code32
+.section .text.pmPICUnmaskIRQ,"ax",@progbits
+.global pmPICUnmaskIRQ
+pmPICUnmaskIRQ:
+    push ebp
+    mov ebp, esp
 
+    push edi
+    push esi
+    push ecx
+
+    /* Get IRQ Line from parameter stack */
+    mov edi, [ebp + 8]
+    cmp edi, 8
+
+    /* If the IRQ Line is less than 8, we only mask on PIC1 */
+    jl .maskPIC1_pmPICUnmaskIRQ
+
+    /* Otherwise we mask on PIC2 by using the PIC2 Data Register and correcting the IRQ Line for PIC2 */
+    mov esi, PIC2_DATA_REG                  /* PIC2_DATA_REG */
+    sub edi, 8
+    jmp .maskWrite_pmPICUnmaskIRQ
+
+.maskPIC1_pmPICUnmaskIRQ:
+    mov esi, PIC1_DATA_REG                  /* PIC1_DATA_REG */
+
+.maskWrite_pmPICUnmaskIRQ:
+
+    /* Read the current Mask Register Value */
+    /* eax = pmPortInByte(maskValue); */
+    push esi
+    call pmPortInByte
+    add esp, 4
+
+    /* mask = oldMask & ~(1 << irqLine) */
+    mov ecx, edi
+    mov edi, 1
+    shl edi, cl
+    not edi
+    and eax, edi
+
+    /* Write Mask value to PIC */
+    /* pmPortOutByte(picPort, maskValue); */
+    push eax
+    push esi
+    call pmPortOutByte
+    add esp, 8
+
+    pop ecx
+    pop esi
+    pop edi
+
+    leave
+    ret
 
 /*
  * Disables PIC1 and PIC2 by masking all interrupts

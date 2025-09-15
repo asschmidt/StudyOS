@@ -155,9 +155,9 @@ pmInit:
     add esp, 8
 
     /* Mask out Timer Interrupt */
-    /* pmPICSetMask(0x00); */
+    /* pmPICMaskIRQ(0x00); */
     push 0x00
-    call pmPICSetMask
+    call pmPICMaskIRQ
     add esp, 4
 
     /* Init PIT */
@@ -167,6 +167,11 @@ pmInit:
     call pmPITInitialize
     add esp, 8
 
+    /* Un-Mask Timer Interrupt */
+    /* pmPICUnmaskIRQ(0x00); */
+    push 0x00
+    call pmPICUnmaskIRQ
+    add esp, 4
 
 .nopLoop_pmInit:
     nop
