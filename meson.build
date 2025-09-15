@@ -118,6 +118,7 @@ lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_idt.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_gpio.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_pic.asm')
 lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_pit.asm')
+lib_lowlevel_source_files += files(lib_lowlevel_dir + 'pm_timer.asm')
 
 # Preprocess the ASM files
 lib_lowlevel_preproc_files = lib_lowlevel_asm_preproc.process(lib_lowlevel_source_files)

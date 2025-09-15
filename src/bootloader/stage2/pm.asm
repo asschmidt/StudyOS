@@ -18,6 +18,9 @@
 #include "pm_idt_defines.asm"
 /* Include PIT Defines */
 #include "pm_pit_defines.asm"
+/* Include System Timer Defines */
+#include "pm_timer_defines.asm"
+
 
 /*
  * External Symbols
@@ -32,6 +35,13 @@
 #define CODE_SEG    0x08
 /* Data Segment Selector */
 #define DATA_SEG    0x10
+
+.section .rodata
+/* const char* PM_MESSAGE="..."; */
+PM_MESSAGE:         .asciz "Switched to Protected Mode"
+
+.section .bss
+
 
 .code16
 .section .text
@@ -154,40 +164,32 @@ pmInit:
     call pmPICRemap
     add esp, 8
 
+    /* Mask Out all Interrupts for PIC1 (due to chaining, also PIC2 is disabled) */
     /* pmPICSetMask(1, 0xFF); */
     push 0xFF
     push 0x01
     call pmPICSetMask
     add esp, 8
 
-    /* Mask out Timer Interrupt */
-    /* pmPICMaskIRQ(0x00); */
-    push 0x00
-    call pmPICMaskIRQ
-    add esp, 4
+    /* Initialize the Timer */
+    /* pmTimerInitialize(); */
+    call pmTimerInitialize
 
-    /* Init PIT */
-    /* pmPITInitialize(&PIT_STAGE2_DATA, 1000); */
-    push 1000
-    push OFFSET PIT_STAGE2_DATA
-    call pmPITInitialize
-    add esp, 8
+    /* Install the correct ISR */
+    /* pmSetupIDTEntry(uint32_t* pIDT, uint8_t idtIdx, uin32_t pFunc, uint8_t typeAttribute, uint16_ segSelector); */
+    push CODE_SEG                           /* CODE_SEG */
+    push IDT_TYPE_ATTRIB_INT32              /* IDT_TYPE_ATTRIB_INT32 */
+    push OFFSET pmTimerISR
+    push PIC1_OFFSET
+    push OFFSET idtTemp
+    call pmSetupIDTEntry
+    add esp, 20
 
-    /* Un-Mask Timer Interrupt */
-    /* pmPICUnmaskIRQ(0x00); */
-    push 0x00
-    call pmPICUnmaskIRQ
-    add esp, 4
+    /* Enable Timer */
+    /* pmTimerEnable(); */
+    call pmTimerEnable
 
 .nopLoop_pmInit:
     nop
     jmp .nopLoop_pmInit
 
-.section .rodata
-/* const char* PM_MESSAGE="..."; */
-PM_MESSAGE:         .asciz "Switched to Protected Mode"
-
-.section .bss
-/* struct PIT_DATA PIT_STAGE2_DATA; */
-.global PIT_STAGE2_DATA
-PIT_STAGE2_DATA:    .space PIT_DATA_SIZE
