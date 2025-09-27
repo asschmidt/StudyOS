@@ -8,10 +8,12 @@ lib_source_dir   = 'src/lib/'
 lib_bios_dir = lib_source_dir + 'bios/'
 lib_lowlevel_dir = lib_source_dir + 'lowlevel/'
 lib_env_dir = lib_source_dir + 'env/'
+lib_driver_dir = lib_source_dir + 'driver/'
 
 lib_bios_inc = '../' + lib_bios_dir
 lib_lowlevel_inc = '../' + lib_lowlevel_dir
 lib_env_inc = '../' + lib_env_dir
+lib_driver_inc = '../' + lib_driver_dir
 
 #
 # Tools used for Generators and Custom-Targets
@@ -165,12 +167,49 @@ lib_env_preproc_files = lib_env_asm_preproc.process(lib_env_source_files)
 # Assemble the ASM source files to object files
 lib_env_object_files = lib_env_asm_gen.process(lib_env_preproc_files)
 
-# Create the static library for liblowlevel
+# Create the static library for libenv
 lib_env = static_library('env',
                     c_args: ['-m32'],
                     sources: lib_env_c_source_files,
                     objects: lib_env_object_files)
 
+
+###############################################################################
+# Lib Driver
+###############################################################################
+lib_driver_asm_gen = generator(gas,
+    output: '@BASENAME@.o',
+    arguments: [gas_args_32bit,
+#                '-I', lib_lowlevel_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
+lib_driver_asm_preproc = generator(cpp,
+    output: '@BASENAME@.i.asm',
+    arguments: [cpp_args,
+                '-I', lib_env_inc,
+                '-I', lib_lowlevel_inc,
+                '@INPUT@',
+                '-o', '@OUTPUT@'])
+
+# Setup the C-Source Files for the Driver Lib
+lib_driver_c_source_files = files(lib_driver_dir + 'driver_structs.c')
+#lib_driver_c_source_files += files(lib_driver_dir + 'driver_structs.c')
+
+# Setup the ASM-Source Files for the Driver Lib
+lib_driver_source_files = files(lib_driver_dir + 'lowlevel/video_textmode.asm')
+
+# Preprocess the ASM files
+lib_driver_preproc_files = lib_driver_asm_preproc.process(lib_driver_source_files)
+
+# Assemble the ASM source files to object files
+lib_driver_object_files = lib_driver_asm_gen.process(lib_driver_preproc_files)
+
+# Create the static library for lib_driver
+lib_driver = static_library('driver',
+                    c_args: ['-m32'],
+                    sources: lib_driver_c_source_files,
+                    objects: lib_driver_object_files)
 
 ###############################################################################
 # Stage1 Boootloader
@@ -263,6 +302,7 @@ stage2_asm_gen = generator(gas,
                 '-I', lib_lowlevel_inc,
                 '-I', lib_bios_inc,
                 '-I', lib_env_inc,
+                '-I', lib_driver_inc,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
@@ -272,6 +312,7 @@ stage2_asm_preproc = generator(cpp,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
                 '-I', lib_env_inc,
+                '-I', lib_driver_inc,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
@@ -324,7 +365,7 @@ stage2_link_elf     = executable(stage2_elf_output, stage2_object_files,
                                    '-T', stage2_linker_file[0].full_path()
                                     ],
                         link_depends: stage2_linker_file,
-                        link_whole: [lib_bios, lib_lowlevel, lib_env])
+                        link_whole: [lib_bios, lib_lowlevel, lib_env, lib_driver])
 
 #
 # Generate a Floppy-Image (1,44 MB) incl. partitions
