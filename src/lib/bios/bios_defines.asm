@@ -9,7 +9,7 @@
 
 /*
  * Disk Info Structure
- * Used by to store disc information retrieved from BIOS INT 13h - Function 08h
+ * Used to store disk information retrieved from BIOS INT 13h - Function 08h
  *
  * struct {
  *   uint16_t cylinder;     // 2 Byte
