@@ -7,5 +7,5 @@
 
 #include "driver_structs.h"
 
-
 VIDEO_TEXTMODE_DRIVER gVideoTextmodeDriver __attribute__ ((section (".debug_helper"))) = {0};
+

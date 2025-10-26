@@ -20,7 +20,9 @@
 #include "pm_pit_defines.asm"
 /* Include System Timer Defines */
 #include "pm_timer_defines.asm"
-
+/* Include Driver Defines */
+#include "driver_defines.asm"
+#include "lowlevel/video_defines.asm"
 
 /*
  * External Symbols
@@ -41,6 +43,8 @@
 PM_MESSAGE:         .asciz "Switched to Protected Mode"
 
 .section .bss
+.global VGA_TEXTMODE_DRIVER
+VGA_TEXTMODE_DRIVER:    .space VIDEO_TEXTMODE_DRV_SIZE
 
 
 .code16
@@ -116,11 +120,27 @@ pmInit:
     mov ebp, eax
     mov esp, ebp
 
-    /* pmPutString(&PM_MESSAGE, videoMemoryOffset); */
-    /* EBX still holds the calculated segment address */
-    push ebx                                /* Offset parameter for Video Memory based on temp. GDT. */
+    /* Prepare the calculated segment offset to be usable as additive offset by
+     * negating it */
+    mov ecx, ebx
+    neg ecx
+
+    /* vidInitializeTextMode(&VGA_TEXTMODE_DRIVER, VIDEO_MEMORY, vidOffset); */
+    push ecx
+    push VIDEO_MEMORY
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidInitializeTextMode
+    add esp, 12
+
+    /* vidClearScreen(&VGA_TEXTMODE_DRIVER); */
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidClearScreen
+    add esp, 4
+
+    /* pmPutString(&VGA_TEXTMODE_DRIVER, &PM_MESSAGE); */
     push OFFSET PM_MESSAGE                  /* Pointer to string */
-    call pmPutString
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidOutputString
     add esp, 8
 
     /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_stage2_segment); */
@@ -188,6 +208,13 @@ pmInit:
     /* Enable Timer */
     /* pmTimerEnable(); */
     call pmTimerEnable
+
+    push 10000
+	call pmTimerBusyWait
+	add esp, 4
+
+
+
 
 .nopLoop_pmInit:
     nop

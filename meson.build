@@ -197,7 +197,8 @@ lib_driver_c_source_files = files(lib_driver_dir + 'driver_structs.c')
 #lib_driver_c_source_files += files(lib_driver_dir + 'driver_structs.c')
 
 # Setup the ASM-Source Files for the Driver Lib
-lib_driver_source_files = files(lib_driver_dir + 'lowlevel/video_textmode.asm')
+lib_driver_source_files = files(lib_driver_dir + 'lowlevel/video_defines.asm')
+lib_driver_source_files += files(lib_driver_dir + 'lowlevel/video_textmode.asm')
 
 # Preprocess the ASM files
 lib_driver_preproc_files = lib_driver_asm_preproc.process(lib_driver_source_files)

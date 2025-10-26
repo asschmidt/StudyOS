@@ -36,26 +36,37 @@
  * Screen coordinates in VGA text mode 80x25
  *
  */
+#define SCREEN_COL_COUNT              80
+#define SCREEN_ROW_COUNT              25
+
 #define SCREEN_ROW_TOP_LEFT           0
 #define SCREEN_COL_TOP_LEFT           0
-#define SCREEN_ROW_LOWER_RIGHT        24
-#define SCREEN_COL_LOWER_RIGHT        79
+#define SCREEN_ROW_LOWER_RIGHT        SCREEN_ROW_COUNT - 1
+#define SCREEN_COL_LOWER_RIGHT        SCREEN_COL_COUNT - 1
 
 
 /*
  *
  * typedef struct _VIDEO_TEXTMODE_DRIVER {
- *      int32_t videoMemoryBaseAdr;             // 4 Byte
- *      int32_t videoMemoryOffset;              // 4 Byte
- *      int32_t videoMemoryAdr;                 // 4 Byte
+ *      uint32_t videoMemoryBaseAdr;             // 4 Byte
+ *      int32_t videoMemoryOffset;               // 4 Byte
+ *      uint32_t videoMemoryAdr;                 // 4 Byte
+ *
+ *      uint8_t cursorCol;                       // 1 Byte
+ *      uint8_t cursorRow;                       // 1 Byte
+ *      uint16_ reserve1;                        // 2 Byte
  *
  * } VIDEO_TEXTMODE_DRIVER;
  *
  */
 
-#define VIDEO_TEXTMODE_DRV_SIZE                     16
+#define VIDEO_TEXTMODE_DRV_SIZE                      16
 #define VIDEO_TEXTMODE_DRV_VIDMEM_BASEADR_OFFSET     0
 #define VIDEO_TEXTMODE_DRV_VIDMEM_OFF_OFFSET         4
 #define VIDEO_TEXTMODE_DRV_VIDMEM_ADR_OFFSET         8
+#define VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET         12
+#define VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET         13
+#define VIDEO_TEXTMODE_DRV_COLOR_FORGROUND_OFFSET    14
+#define VIDEO_TEXTMODE_DRV_COLOR_BACKGROUND_OFFSET   15
 
 #endif
