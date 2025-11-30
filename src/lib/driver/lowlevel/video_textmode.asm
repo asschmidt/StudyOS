@@ -78,8 +78,6 @@ vidInitializeTextMode:
  *      -
  *
  */
-#define pDriver             8
-
 .code32
 .section .text.vidClearScreen,"ax",@progbits
 .global vidClearScreen
@@ -92,7 +90,7 @@ vidClearScreen:
     push esi
 
     /* Get the video memory address from driver struct */
-    mov esi, [ebp + pDriver]
+    mov esi, [ebp + 8]
     mov edi, [esi + VIDEO_TEXTMODE_DRV_VIDMEM_ADR_OFFSET]
 
     /* Get Color info */
@@ -119,6 +117,126 @@ vidClearScreen:
 
 
 /*
+ * Sets the cursor position to provided column and row
+ *
+ * void vidSetCursor(VIDEO_TEXTMODE_DRIVER* pDriver, uint8_t row, uint8_t col);
+ *
+ *    Parameters:
+ *      EBP + 8:  pDriver
+ *      EBP + 12: row
+ *      EBP + 16: col
+ *
+ *    Returns:
+ *      -
+ *
+ */
+.code32
+.section .text.vidSetCursor,"ax",@progbits
+.global vidSetCursor
+vidSetCursor:
+    push ebp
+    mov ebp, esp
+
+    push ecx
+    push esi
+
+    /* Get pointer to VIDEO_DRIVER struct into ESI */
+    mov esi, [ebp + 8]
+
+    /* Get the row parameter and set it as new row value in driver struct */
+    mov ecx, [ebp + 12]
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET], cl
+
+    /* Get the col parameter and set it as new col value in driver struct */
+    mov ecx, [ebp + 16]
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET], cl
+
+    pop esi
+    pop ecx
+
+    leave
+    ret
+
+
+/*
+ * Scrolls the screen by the number of rows provided as parameter
+ *
+ * void vidScrollDown(VIDEO_TEXTMODE_DRIVER* pDriver, uint8_t rowCount);
+ *
+ *    Parameters:
+ *      EBP + 8:  pDriver
+ *      EBP + 12: rowCount
+ *
+ *    Returns:
+ *      -
+ *
+ */
+.code32
+.section .text.vidScrollDown,"ax",@progbits
+.global vidScrollDown
+vidScrollDown:
+    push ebp
+    mov ebp, esp
+
+    push ebx
+    push ecx
+    push edx
+    push edi
+    push esi
+
+    /* Get the video memory address from driver struct */
+    mov ebx, [ebp + 8]
+    mov edi, [ebx + VIDEO_TEXTMODE_DRV_VIDMEM_ADR_OFFSET]
+    /* Set ESI and EDI to video memory address */
+    mov esi, edi
+
+    /* Get rowCount parameter into EAX */
+    xor eax, eax
+    mov eax, [ebp + 12]
+    /* Calculate the offset in the source buffer by the number of
+     * lines we will scroll */
+    xor edx, edx
+    mov edx, SCREEN_COL_COUNT
+    /* EAX = rowCount * SCREEN_COL_COUNT */
+    mul edx
+    /* Save eax for late reuse */
+    push eax
+    /* Multiply EAX by 2 because of two bytes per char on screen */
+    shl eax, 1
+    /* Adjust pointer to source buffer area */
+    add esi, eax
+    /* Restore EAX in ECX ==> ECX = rowCount * SCREEN_COL_COUNT */
+    pop ecx
+
+    /* Calculate scroll loop count */
+    xor eax, eax
+    mov eax, SCREEN_ROW_COUNT * SCREEN_COL_COUNT
+    /* loopCount = (SCREEN_COL_COUNT * SCREEN_ROW_COUNT) - (SCREEN_COL_COUNT * rowCount) */
+    sub eax, ecx
+
+
+scrollLoop_vidScrollDown:
+    /* Could be optimized by 4-Byte read/writes */
+    mov dx, WORD PTR [esi]
+    mov [edi], dx
+    add esi, 2
+    add edi, 2
+    dec eax
+    jnz scrollLoop_vidScrollDown
+
+    /* Clear last line on screen with space char */
+clearLoop_vidScrollDown:
+
+    pop esi
+    pop edi
+    pop edx
+    pop ecx
+    pop ebx
+
+    leave
+    ret
+
+/*
  * Outputs a string at current cursor position
  *
  * void vidOutputString(VIDEO_TEXTMODE_DRIVER* pDriver, char* string);
@@ -131,9 +249,6 @@ vidClearScreen:
  *      -
  *
  */
-#define pDriver             8
-#define string              12
-
 .code32
 .section .text.vidOutputString,"ax",@progbits
 .global vidOutputString
@@ -147,7 +262,7 @@ vidOutputString:
     push esi
 
     /* Get the video memory address from driver struct */
-    mov esi, [ebp + pDriver]
+    mov esi, [ebp + 8]
     mov edi, [esi + VIDEO_TEXTMODE_DRV_VIDMEM_ADR_OFFSET]
 
     /* Get the current cursor position to calculate correct memory offset in video memory */
@@ -175,7 +290,7 @@ vidOutputString:
     or ch, [esi + VIDEO_TEXTMODE_DRV_COLOR_FORGROUND_OFFSET]
 
     /* Get the pointer to the string */
-    mov esi, [ebp + string]
+    mov esi, [ebp + 12]
     /* Get first char */
     mov cl, [esi]
 
