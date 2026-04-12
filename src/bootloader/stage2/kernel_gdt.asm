@@ -65,7 +65,7 @@ gdtDataKernel:
 gdtEndKernel:
 
 
-.section .bss
+.section .bss_16
 
 /*
  * GDT Descriptor as global variable in BSS segement.

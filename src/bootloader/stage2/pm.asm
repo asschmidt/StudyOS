@@ -24,14 +24,6 @@
 #include "driver_defines.asm"
 #include "lowlevel/video_defines.asm"
 
-/*
- * External Symbols
- */
-.extern gdtCodeTemp                         /* Symbol for the Code-Segement Entry in temporary GDT */
-.extern gdtDataTemp                         /* Symbol for the Data-Segement Entry in temporary GDT */
-.extern gdtStartTemp                        /* Symbol for Start of the temporary GDT */
-.extern gdtDescriptorTemp                   /* Symbol for the descriptor of the temporary GDT */
-
 /* Constants */
 /* Code Segment Selector */
 #define CODE_SEG    0x08
@@ -39,8 +31,7 @@
 #define DATA_SEG    0x10
 
 .section .rodata
-/* const char* PM_MESSAGE="..."; */
-PM_MESSAGE:         .asciz "Switched to Protected Mode"
+PM_MESSAGE:             .asciz "Switched to Protected Mode"
 
 .section .bss
 .global VGA_TEXTMODE_DRIVER
@@ -61,10 +52,15 @@ pmSwitch:
 	cli
 
     /* pmPrepareGDT(&gdtStartTemp, &gdtEndTemp, &_stage2_segment, &gdtDescriptorTemp); */
-    push OFFSET gdtDescriptorTemp
+    /*push OFFSET gdtDescriptorTemp
     push OFFSET _stage2_segment
     push OFFSET gdtEndTemp
-    push OFFSET gdtStartTemp
+    push OFFSET gdtStartTemp*/
+
+    push OFFSET gdtDescriptorKernel
+    push OFFSET _stage2_segment
+    push OFFSET gdtEndKernel
+    push OFFSET gdtStartKernel
     call pmPrepareGDT
     add sp, 8
 
@@ -72,7 +68,7 @@ pmSwitch:
      * having different segement addresse (because of .data and .rodata section placement)
      * gdtDescriptorTemp is located in .bss segement which has a different segment address
      */
-    lgdt [es:gdtDescriptorTemp]				/* Load the GDT */
+    lgdt [es:gdtDescriptorKernel]				/* Load the GDT */
 
     mov eax, cr0                            /* Get the current CR0 value */
     or eax, 0x01                            /* Set Bit 0 to switch to PM */
@@ -137,11 +133,24 @@ pmInit:
     call vidClearScreen
     add esp, 4
 
+    /* vidSetCursor(&VA_TEXTMODE_DRIVER, 0, 0); */
+    push 0
+    push 1
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidSetCursor
+    add esp, 12
+
     /* pmPutString(&VGA_TEXTMODE_DRIVER, &PM_MESSAGE); */
     push OFFSET PM_MESSAGE                  /* Pointer to string */
     push OFFSET VGA_TEXTMODE_DRIVER
     call vidOutputString
     add esp, 8
+
+    push 1
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidScrollDown
+    add esp, 8
+
 
     /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_stage2_segment); */
     push OFFSET _stage2_segment
@@ -213,8 +222,9 @@ pmInit:
 	call pmTimerBusyWait
 	add esp, 4
 
-
-
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidPrintMessage
+    add esp, 4
 
 .nopLoop_pmInit:
     nop

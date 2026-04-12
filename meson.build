@@ -194,6 +194,7 @@ lib_driver_asm_preproc = generator(cpp,
 
 # Setup the C-Source Files for the Driver Lib
 lib_driver_c_source_files = files(lib_driver_dir + 'driver_structs.c')
+lib_driver_c_source_files = files(lib_driver_dir + 'video_textmode.c')
 #lib_driver_c_source_files += files(lib_driver_dir + 'driver_structs.c')
 
 # Setup the ASM-Source Files for the Driver Lib

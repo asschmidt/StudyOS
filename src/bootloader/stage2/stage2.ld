@@ -43,18 +43,27 @@ DUMMY_ADDRESS               = 0x00100000;
  */
 STAGE2_ADR              = 0x7E00;
 STAGE2_SIZE             = 32K;
-STAGE2_OFFSET           = 0x0;
+STAGE2_OFFSET           = STAGE2_ADR;
 STAGE2_SEGMENT          = (STAGE2_ADR - STAGE2_OFFSET) / 16;
 
 /*
+ * Defines the start address and size for the RAM used by the Stage2 16-Bit ode
+ * This covers the .bss_16 section.
+ */
+STAGE2_RAM_16_ADR       = STAGE2_ADR + STAGE2_SIZE;
+STAGE2_RAM_16_SIZE      = 256;
+STAGE2_RAM_16_OFFSET    = STAGE2_RAM_16_ADR;
+STAGE2_RAM_16_SEGMENT   = (STAGE2_RAM_16_ADR - STAGE2_RAM_16_OFFSET) / 16;
+
+/*
  * Defines the start address and size for the RAM used by the Stage2
- * Bootloader. This covers the .bss section The .data section contains
+ * Bootloader. This covers the .bss section. The .data section contains
  * initialized variables and must be loaded into memory. Therefore the
  * .data section must reside in the bootloader binary
  */
-STAGE2_RAM_ADR          = STAGE2_ADR + STAGE2_SIZE;
+STAGE2_RAM_ADR          = STAGE2_RAM_16_ADR + STAGE2_RAM_16_SIZE;
 STAGE2_RAM_SIZE         = 8K;
-STAGE2_RAM_OFFSET       = 0x0;
+STAGE2_RAM_OFFSET       = STAGE2_RAM_ADR;
 STAGE2_RAM_SEGMENT      = (STAGE2_RAM_ADR - STAGE2_RAM_OFFSET) / 16;
 
 /*
@@ -66,27 +75,28 @@ STAGE2_RAM_SEGMENT      = (STAGE2_RAM_ADR - STAGE2_RAM_OFFSET) / 16;
  */
 STAGE2_STACK_ADR        = 0x7F000;
 STAGE2_STACK_SIZE       = 4K;
-STAGE2_STACK_OFFSET     = 0x0;
+STAGE2_STACK_OFFSET     = 0x00;
 STAGE2_STACK_SEGMENT    = (STAGE2_STACK_ADR - STAGE2_STACK_OFFSET) / 16;
 
 
 MEMORY
 {
+    /* Code & Data Memory Area for Stage 2 Bootloader */
+    STAGE2 (rx)         : ORIGIN = STAGE2_ADR                       LENGTH = STAGE2_SIZE
+
+    /* Memory Areas for Stage 2 RAM accessable with in Real-Mode without Segment/Offset */
+    STAGE2_RAM_16 (rw)	: ORIGIN = STAGE2_RAM_16_ADR,               LENGTH = STAGE2_RAM_16_SIZE
+
     /* Memory Areas for Stage 2 RAM */
     STAGE2_RAM (rw)	    : ORIGIN = STAGE2_RAM_ADR,                  LENGTH = STAGE2_RAM_SIZE
-    STAGE2_RAM_VMA (rw)	: ORIGIN = STAGE2_OFFSET + STAGE2_SIZE,     LENGTH = STAGE2_RAM_SIZE
 
     /* Memory Area for Stage 2 Stack */
     STAGE2_STACK(rw)    : ORIGIN = STAGE2_STACK_ADR                 LENGTH = STAGE2_STACK_SIZE
 
-    /* Memory Area for Stage 2 Bootloader */
-    STAGE2 (rx)         : ORIGIN = STAGE2_ADR                       LENGTH = STAGE2_SIZE
-    STAGE2_VMA (rwx)    : ORIGIN = STAGE2_OFFSET                    LENGTH = STAGE2_SIZE
-
     /* Dummy Memory region to store sections not part of the final binary */
     /* The address space of this region doesn't really matter, we should
        just move it our of the way from everything else */
-    DUMMY (rwx)                 : ORIGIN = DUMMY_ADDRESS,                   LENGTH = 10M
+    DUMMY (rwx)         : ORIGIN = DUMMY_ADDRESS,                   LENGTH = 10M
 }
 
 /* Define the addresses (segment + offset) for the Stage 2 Bootloader */
@@ -114,7 +124,7 @@ SECTIONS
         *(.text.*);
 
         . = ALIGN(4);
-   	} > STAGE2_VMA AT> STAGE2
+   	} > STAGE2
 
 	.rodata :
    	{
@@ -122,7 +132,7 @@ SECTIONS
     	KEEP(*(.rodata));
         . = ALIGN(4);
 
-	} > STAGE2_VMA AT> STAGE2
+	} > STAGE2
 
 	.data :
    	{
@@ -136,7 +146,7 @@ SECTIONS
     	_data_end = .;
         . = ALIGN(4);
 
-	} > STAGE2_VMA AT> STAGE2
+	} > STAGE2
 
     .gdt :
    	{
@@ -144,7 +154,27 @@ SECTIONS
     	KEEP(*(.gdt));
         . = ALIGN(4);
 
-	} > STAGE2_VMA AT> STAGE2
+	} > STAGE2
+
+    .bss_16 :
+   	{
+        . = ALIGN(4);
+
+        /* Symbol to mark the start of the .bss section */
+   		_bss_16_start = .;
+
+    	/*
+         * Insert all .bss_16 input sections
+         * Hereby, only space is reserved and no actual data is stored in the ELF
+         * binary for this section.
+         */
+    	KEEP(*(.bss_16));
+
+        /* Symbol to mark the end of the .bss section */
+    	_bss_16_end = .;
+
+        . = ALIGN(4);
+	} > STAGE2_RAM_16
 
 	.bss :
    	{
@@ -164,7 +194,7 @@ SECTIONS
     	_bss_end = .;
 
         . = ALIGN(4);
-	} > STAGE2_RAM_VMA AT> STAGE2_RAM
+	} > STAGE2_RAM
 
     /*
      * Calculate the start for the .stack section based on the RAM memory size and the
