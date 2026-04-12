@@ -21,10 +21,6 @@
  *      -
  *
  */
-#define pDriver             8
-#define videoMemoryAdr      12
-#define videoMemoryOffset   16
-
 .code32
 .section .text.vidInitializeTextMode,"ax",@progbits
 .global vidInitializeTextMode
@@ -36,9 +32,9 @@ vidInitializeTextMode:
     push ecx
     push edx
 
-    mov edi, [ebp + pDriver]                                        /* Get the pDriver pointer from parameter stack into EDI */
-    mov ecx, [ebp + videoMemoryAdr]                                 /* Get the videoMemoryAdr from parameter stack into ECX */
-    mov edx, [ebp + videoMemoryOffset]                              /* Get the videoMemoryOffset from parameter stack into EDX */
+    mov edi, [ebp + 8]                                              /* Get the pDriver pointer from parameter stack into EDI */
+    mov ecx, [ebp + 12]                                             /* Get the videoMemoryAdr from parameter stack into ECX */
+    mov edx, [ebp + 16]                                             /* Get the videoMemoryOffset from parameter stack into EDX */
 
     /* Prepare the pDriver struct */
     mov [edi + VIDEO_TEXTMODE_DRV_VIDMEM_BASEADR_OFFSET], ecx       /* VIDEO_TEXTMODE_DRV_VIDMEM_BASEADR_OFFSET */

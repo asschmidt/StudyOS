@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef _PIT_DEFINES_ASM_
+#define _PIT_DEFINES_ASM_
+
 .intel_syntax noprefix
 
 
@@ -63,3 +66,4 @@
 #define PIT_DATA_IRQ0_FREQ_OFF          2
 #define PIT_DATA_IRQ0_MS_OFF            6
 
+#endif

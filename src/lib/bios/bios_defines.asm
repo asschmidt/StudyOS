@@ -23,10 +23,11 @@
 #define DISK_INFO_SECTORS_OFFSET      2
 #define DISK_INFO_HEADS_OFFSET        3
 
+
 /*
- * BIOS Color Defines
- *
- */
+* BIOS Color Defines
+*
+*/
 #define COLOR_BLACK                   0x0
 #define COLOR_BLUE                    0x1
 #define COLOR_GREEN                   0x2
@@ -45,9 +46,9 @@
 #define COLOR_WHITE                   0xF
 
 /*
- * Screen coordinates in text mode 80x25
- *
- */
+* Screen coordinates in text mode 80x25
+*
+*/
 #define SCREEN_ROW_TOP_LEFT           0
 #define SCREEN_COL_TOP_LEFT           0
 #define SCREEN_ROW_LOWER_RIGHT        24

@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef _PIC_DEFINES_ASM_
+#define _PIC_DEFINES_ASM_
+
 .intel_syntax noprefix
 
 /* IO Port Address for PIC1 */
@@ -60,3 +63,4 @@
 #define PIC1_OFFSET         0x20
 #define PIC2_OFFSET         0x28
 
+#endif

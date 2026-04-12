@@ -36,7 +36,7 @@ ENTRY(stage1Start)
  * The chosen address is the end of the addressable memory space for x86 in
  * real mode (= 1MB)
  */
-DUMMY_ADDRESS       = 0x00100000;
+DUMMY_ADDRESS           = 0x00100000;
 
 
 /******************************************************************************

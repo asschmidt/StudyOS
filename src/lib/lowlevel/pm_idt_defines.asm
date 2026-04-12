@@ -3,6 +3,10 @@
  *
  *
  */
+
+#ifndef _IDT_DEFINES_ASM_
+#define _IDT_DEFINES_ASM_
+
 .intel_syntax noprefix
 
 
@@ -39,3 +43,4 @@
 #define IDT_TYPE_ATTRIB_TRAP32 (IDT_ENTRY_PRESENT << 7) | (DPL_RING0 << 6) | (GT_TRAP32)
 #define IDT_TYPE_ATTRIB_TASK   (IDT_ENTRY_PRESENT << 7) | (DPL_RING0 << 6) | (GT_TASK)
 
+#endif
