@@ -5,9 +5,6 @@
 
 #include "driver_structs.h"
 
-void vidPrintMessage(VIDEO_TEXTMODE_DRIVER* pDriver);
-
-
 extern void vidClearScreen(VIDEO_TEXTMODE_DRIVER* pDriver);
 extern void vidSetCursor(VIDEO_TEXTMODE_DRIVER* pDriver, int8_t row, int8_t col);
 extern void vidOutputChar(VIDEO_TEXTMODE_DRIVER* pDriver, char c);

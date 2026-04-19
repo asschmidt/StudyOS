@@ -236,7 +236,7 @@ clearLoop_vidScrollDown:
 /*
  * Updates the cursor position based on the character
  *
- * Hereby, usual escape characters like \r \n etc. will modify the cusor position
+ * Hereby, usualy escape characters like \r \n etc. will modify the cusor position
  *
  * void vidUpdateCursor(VIDEO_TEXTMODE_DRIVER* pDriver, char c);
  *

@@ -31,8 +31,6 @@
 
 #include "env_io.h"
 
-int putchar(int c);
-
 static void simple_outputchar(char **str, char c)
 {
 	if (str) {
