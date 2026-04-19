@@ -232,23 +232,117 @@ clearLoop_vidScrollDown:
     leave
     ret
 
+
 /*
- * Outputs a string at current cursor position
+ * Updates the cursor position based on the character
  *
- * void vidOutputString(VIDEO_TEXTMODE_DRIVER* pDriver, char* string);
+ * Hereby, usual escape characters like \r \n etc. will modify the cusor position
+ *
+ * void vidUpdateCursor(VIDEO_TEXTMODE_DRIVER* pDriver, char c);
  *
  *    Parameters:
  *      EBP + 8:  pDriver
- *      EBP + 12: string
+ *      EBP + 12: c
  *
  *    Returns:
  *      -
  *
  */
 .code32
-.section .text.vidOutputString,"ax",@progbits
-.global vidOutputString
-vidOutputString:
+.section .text.vidUpdateCursor,"ax",@progbits
+.global vidUpdateCursor
+vidUpdateCursor:
+    push ebp
+    mov ebp, esp
+
+    push ebx
+    push ecx
+    push edi
+    push esi
+
+    xor ebx, ebx
+
+    /* Get the video memory address from driver struct */
+    mov esi, [ebp + 8]
+    /* Get the character to check for escape characters */
+    mov cl, [ebp + 12]
+
+    /* Check for "New Line" ==> need to set col to 0 and row to row + 1 */
+    cmp cl, '\n'
+    jnz .return_vidUpdateCursor
+
+    /* Get the col parameter and set it to 0 */
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET], 0
+    /* Get the row parameter and incremenmt it by 1 */
+    mov bl, BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET]
+    inc bl
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET], bl
+
+    jmp .updateDone_vidUpdateCursor
+
+.return_vidUpdateCursor:
+    /* Check for "Return" and set col to 0 */
+    cmp cl, '\r'
+    jnz .tab_vidUpdateCursor
+    /* Get the col parameter and set it to 0 */
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET], 0
+
+    jmp .updateDone_vidUpdateCursor
+
+.tab_vidUpdateCursor:
+    cmp cl, '\t'
+    jnz .anyChar_vidUpdateCursor
+    /* Get the row parameter and set it as new row value in driver struct */
+    mov bl, BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET]
+    add bl, 4
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET], bl
+
+    jmp .updateDone_vidUpdateCursor
+
+.anyChar_vidUpdateCursor:
+    /* Handle "else" branch for any other character */
+    /* For this, we increment the col and handle the wrap of the line */
+    mov bl, BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET]
+    inc ebx
+    cmp bl, 79
+    jg .handleWrap_vidUpdateCursor
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET], bl
+    jmp .updateDone_vidUpdateCursor
+
+.handleWrap_vidUpdateCursor:
+    mov bl, 0
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_COL_OFFSET], bl
+    mov bl, BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET]
+    inc bl
+    mov BYTE PTR [esi + VIDEO_TEXTMODE_DRV_CURSOR_ROW_OFFSET], bl
+
+.updateDone_vidUpdateCursor:
+
+    pop esi
+    pop edi
+    pop ecx
+    pop ebx
+
+    leave
+    ret
+
+/*
+ * Outputs a char at current cursor position
+ *
+ * void vidOutputChar(VIDEO_TEXTMODE_DRIVER* pDriver, char c);
+ *
+ *    Parameters:
+ *      EBP + 8:  pDriver
+ *      EBP + 12: c
+ *
+ *    Returns:
+ *      -
+ *
+ */
+.code32
+.section .text.vidOutputChar,"ax",@progbits
+.global vidOutputChar
+vidOutputChar:
     push ebp
     mov ebp, esp
 
@@ -285,14 +379,68 @@ vidOutputString:
     mov ch, [esi + VIDEO_TEXTMODE_DRV_COLOR_BACKGROUND_OFFSET]
     or ch, [esi + VIDEO_TEXTMODE_DRV_COLOR_FORGROUND_OFFSET]
 
+    /* Get the char to print */
+    mov cl, BYTE PTR [ebp + 12]
+    cmp cl, 31
+    jle .updateCursor_vidOutputChar
+
+.output_vidOutputChar:
+    /* Move character and color info as word into video memory */
+    mov [edi], cx
+
+.updateCursor_vidOutputChar:
+    /* Update cursor position for character output */
+    push ecx
+    push esi
+    call vidUpdateCursor
+    add esp, 8
+
+    pop esi
+    pop edi
+    pop ecx
+    pop ebx
+
+    leave
+    ret
+
+/*
+ * Outputs a string at current cursor position
+ *
+ * void vidOutputString(VIDEO_TEXTMODE_DRIVER* pDriver, char* string);
+ *
+ *    Parameters:
+ *      EBP + 8:  pDriver
+ *      EBP + 12: string
+ *
+ *    Returns:
+ *      -
+ *
+ */
+.code32
+.section .text.vidOutputString,"ax",@progbits
+.global vidOutputString
+vidOutputString:
+    push ebp
+    mov ebp, esp
+
+    push ebx
+    push ecx
+    push edi
+    push esi
+
+    /* Get the video memory address from driver struct */
+    mov edi, [ebp + 8]
     /* Get the pointer to the string */
     mov esi, [ebp + 12]
     /* Get first char */
     mov cl, [esi]
 
 .printLoop_vidOutputString:
-    mov [edi], cx                               /* Move character and color info as word into video memory */
-    add edi, 2                                  /* Increment the pointer to video memory to the next word */
+    push ecx
+    push edi
+    call vidOutputChar
+    add esp, 8
+
     inc esi                                     /* Increment the pointer to the string to get next character */
     mov cl, [esi]                               /* Get character from string */
     cmp cl, 0                                   /* Check for NULL string termination */

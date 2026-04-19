@@ -130,7 +130,7 @@ lib_lowlevel_object_files = lib_lowlevel_asm_gen.process(lib_lowlevel_preproc_fi
 
 # Create the static library for liblowlevel
 lib_lowlevel = static_library('lowlevel',
-                    c_args: ['-m32'],
+                    c_args: [gcc_args_32bit],
                     sources: lib_lowlevel_c_source_files,
                     objects: lib_lowlevel_object_files)
 
@@ -169,7 +169,7 @@ lib_env_object_files = lib_env_asm_gen.process(lib_env_preproc_files)
 
 # Create the static library for libenv
 lib_env = static_library('env',
-                    c_args: ['-m32'],
+                    c_args: [gcc_args_32bit],
                     sources: lib_env_c_source_files,
                     objects: lib_env_object_files)
 
@@ -209,7 +209,7 @@ lib_driver_object_files = lib_driver_asm_gen.process(lib_driver_preproc_files)
 
 # Create the static library for lib_driver
 lib_driver = static_library('driver',
-                    c_args: ['-m32'],
+                    c_args: [gcc_args_32bit],
                     sources: lib_driver_c_source_files,
                     objects: lib_driver_object_files)
 
@@ -336,6 +336,8 @@ stage2_source_files += files(stage2_source_dir + 'stage2_idt.asm')
 stage2_source_files += files(stage2_source_dir + 'kernel_gdt.asm')
 stage2_source_files += files(stage2_source_dir + 'pm.asm')
 
+stage2_c_source_files = files(stage2_source_dir + 'stage2_main.c')
+
 # Preprocess the ASM files
 stage2_preproc_files = stage2_asm_preproc.process(stage2_source_files)
 
@@ -360,7 +362,9 @@ stage2_elf_linker_args  = stage2_linker_args + ['-Wl,--oformat=elf32-i386']
 #
 # Build Target to create the ELF for Stage1
 #
-stage2_link_elf     = executable(stage2_elf_output, stage2_object_files,
+stage2_link_elf     = executable(stage2_elf_output, objects: stage2_object_files, sources: stage2_c_source_files,
+                        c_args: [gcc_args_32bit],
+                        include_directories: [lib_lowlevel_inc, lib_env_inc, lib_driver_inc],
                         name_suffix: 'elf',
                         link_args : [stage2_elf_linker_args,
                                    '-Wl,-Map,' + stage2_elf_output_map,

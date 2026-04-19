@@ -31,7 +31,7 @@
 #define DATA_SEG    0x10
 
 .section .rodata
-PM_MESSAGE:             .asciz "Switched to Protected Mode"
+PM_MESSAGE:             .asciz "Switched to Protected Mode\n"
 
 .section .bss
 .global VGA_TEXTMODE_DRIVER
@@ -135,7 +135,7 @@ pmInit:
 
     /* vidSetCursor(&VA_TEXTMODE_DRIVER, 0, 0); */
     push 0
-    push 1
+    push 0
     push OFFSET VGA_TEXTMODE_DRIVER
     call vidSetCursor
     add esp, 12
@@ -145,12 +145,6 @@ pmInit:
     push OFFSET VGA_TEXTMODE_DRIVER
     call vidOutputString
     add esp, 8
-
-    push 1
-    push OFFSET VGA_TEXTMODE_DRIVER
-    call vidScrollDown
-    add esp, 8
-
 
     /* pmPrepareIDT(&idtDescriptorTemp, &idtTemp, IDT_ENTRY_COUNT, &_stage2_segment); */
     push OFFSET _stage2_segment
@@ -171,8 +165,8 @@ pmInit:
     /* Initialize the IDT Entries for 0x20...0xFF */
     /* for (i=0xFF; i>0x19; i--) */
     mov ecx, 0xFF
-.initIDTLoop_pmInit:
 
+.initIDTLoop_pmInit:
     /* pmSetupIDTEntry(&idtTemp, i, &pmDefaultISR, IDT_TYPE_ATTRIB_INT32, CODE_SEG); */
     push CODE_SEG                           /* CODE_SEG */
     push IDT_TYPE_ATTRIB_INT32              /* IDT_TYPE_ATTRIB_INT32 */
@@ -218,13 +212,8 @@ pmInit:
     /* pmTimerEnable(); */
     call pmTimerEnable
 
-    push 10000
-	call pmTimerBusyWait
-	add esp, 4
-
-    push OFFSET VGA_TEXTMODE_DRIVER
-    call vidPrintMessage
-    add esp, 4
+    /* Should never return */
+    call stage2Main
 
 .nopLoop_pmInit:
     nop
