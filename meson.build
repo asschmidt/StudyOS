@@ -42,7 +42,7 @@ gas_args_32bit = ['-g', '-march=i386', '--32', '-msyntax=intel']
 # GNU C Compiler
 # Debug Infos -g
 # 32 Bit (not 64 Bit by default)
-gcc_args_32bit = ['-g', '-m32']
+gcc_args_32bit = ['-g', '-m32', '-fno-stack-protector']
 
 #
 # GNU Pre-Processor Arguments for Assembler-Usage
@@ -143,6 +143,7 @@ lib_env_asm_gen = generator(gas,
     arguments: [gas_args_32bit,
 #                '-I', lib_lowlevel_inc,
 #                '-I', lib_bios_inc,
+                '-I', lib_driver_inc,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
@@ -151,11 +152,15 @@ lib_env_asm_preproc = generator(cpp,
     arguments: [cpp_args,
                 '-I', lib_bios_inc,
                 '-I', lib_lowlevel_inc,
+                '-I', lib_driver_inc,
                 '@INPUT@',
                 '-o', '@OUTPUT@'])
 
 # Setup the C-Source Files for the Env Lib
 lib_env_c_source_files = files(lib_env_dir + 'env_structs.c')
+lib_env_c_source_files += files(lib_env_dir + 'arith64.c')
+lib_env_c_source_files += files(lib_env_dir + 'env_io.c')
+lib_env_c_source_files += files(lib_env_dir + 'env_printf.c')
 #lib_env_c_source_files += files(lib_env_dir + 'common_structs.c')
 
 # Setup the ASM-Source Files for the Env Lib
@@ -170,6 +175,7 @@ lib_env_object_files = lib_env_asm_gen.process(lib_env_preproc_files)
 # Create the static library for libenv
 lib_env = static_library('env',
                     c_args: [gcc_args_32bit],
+                    include_directories: [lib_driver_inc],
                     sources: lib_env_c_source_files,
                     objects: lib_env_object_files)
 
@@ -368,7 +374,7 @@ stage2_link_elf     = executable(stage2_elf_output, objects: stage2_object_files
                         name_suffix: 'elf',
                         link_args : [stage2_elf_linker_args,
                                    '-Wl,-Map,' + stage2_elf_output_map,
-                                   '-T', stage2_linker_file[0].full_path()
+                                   '-T', stage2_linker_file[0].full_path(),
                                     ],
                         link_depends: stage2_linker_file,
                         link_whole: [lib_bios, lib_lowlevel, lib_env, lib_driver])
