@@ -32,6 +32,9 @@
 
 .section .rodata
 PM_MESSAGE:             .asciz "Switched to Protected Mode\n"
+IDT_MESSAGE:            .asciz "IDT initialized\n"
+PIC_MESSAGE:            .asciz "PIC initialized\n"
+TIMER_MESSAGE:          .asciz "Timer initialized\n"
 
 .section .bss
 .global VGA_TEXTMODE_DRIVER
@@ -180,6 +183,12 @@ pmInit:
     cmp ecx, 0x19
     jne .initIDTLoop_pmInit
 
+    /* pmPutString(&VGA_TEXTMODE_DRIVER, &PM_MESSAGE); */
+    push OFFSET IDT_MESSAGE                 /* Pointer to string */
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidOutputString
+    add esp, 8
+
     /* Remap the PIC with the correct offset */
     /* pmPICRemap(PIC1_OFFSET, PIC2_OFFSET); */
     push PIC2_OFFSET                        /* Offset for PIC2 --> IRQ 8..15 -> IDT: 0x28...0x2F (PIC2_OFFSET) */
@@ -192,6 +201,12 @@ pmInit:
     push 0xFF
     push 0x01
     call pmPICSetMask
+    add esp, 8
+
+    /* pmPutString(&VGA_TEXTMODE_DRIVER, &PM_MESSAGE); */
+    push OFFSET PIC_MESSAGE                /* Pointer to string */
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidOutputString
     add esp, 8
 
     /* Initialize the Timer */
@@ -211,6 +226,12 @@ pmInit:
     /* Enable Timer */
     /* pmTimerEnable(); */
     call pmTimerEnable
+
+    /* pmPutString(&VGA_TEXTMODE_DRIVER, &PM_MESSAGE); */
+    push OFFSET TIMER_MESSAGE              /* Pointer to string */
+    push OFFSET VGA_TEXTMODE_DRIVER
+    call vidOutputString
+    add esp, 8
 
     /* Should never return */
     call stage2Main
